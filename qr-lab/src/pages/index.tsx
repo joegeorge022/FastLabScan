@@ -19,7 +19,7 @@ export default function Home() {
     <main className="">
       <div className="">
         <div className='w-[100vw]'>
-        <QR props={updateID} />
+        <QR updateID={updateID} />
         <p>{result? result : "Scanning"}</p>
         </div>
       </div>
