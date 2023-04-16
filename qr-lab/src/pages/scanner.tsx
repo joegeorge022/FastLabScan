@@ -3,7 +3,6 @@ import { Inter } from 'next/font/google'
 import { QR } from '@/components/qr'
 import { useEffect, useState } from 'react'
 import Profile from '@/components/students'
-import notificate from '@/components/notify'
 
 const inter = Inter({ subsets: ['latin'] })
 type Data = { name: string, reg: string } | void
@@ -11,13 +10,14 @@ type Data = { name: string, reg: string } | void
 export default function Home() {
   const [result, setResult] = useState<Data | null>(null)
 
-  function updateID(id :string, time: number) {
+  function updateID(id :string) {
 
     fetch(`/api/students/${id}`)
     .then(res => {
 
-          res.json()
-             .then((data) => setResult(data)) 
+          res.status === 200 ? res.json()
+                                  .then((data) => setResult(data)) 
+                             : new Error("User not found") && setResult(null)
 
     })
     .catch(err => {
@@ -28,8 +28,7 @@ export default function Home() {
   }
 
   useEffect(()=>{
-    result ? notificate(result) : null
-    result ? console.log(result) : null
+    console.log(result)
   }, [result])
 
   return (
@@ -38,7 +37,7 @@ export default function Home() {
         <div className='w-[100vw]'>
           
         <QR updateID={updateID} />
-          {result? <Profile data={result} /> : <p>Scanning</p>}
+          {result? result.name : <p>Scanning</p>}
         </div>
       </div>
     </main>

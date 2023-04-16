@@ -7,13 +7,7 @@ export const QR = ({updateID}) => {
   return (
     <>
       <QrReader
-        onResult={(result, error) => {
-          if (result) {
-            alert(result?.text);
-            updateID(result?.text);
-            alert("done")
-          }
-        }}
+        onResult={(result, error) => result && updateID(result?.text, result.getTimestamp())}
         style={{ width: '100%' }}
       />
     </>
