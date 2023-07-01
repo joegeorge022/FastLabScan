@@ -1,10 +1,7 @@
 import type { NextApiRequest, NextApiResponse } from 'next'
 
-type Data = {
-  name: string,
-  reg: string,
-}
-
+type Data = { name: string, reg: string, }
+  //    ^?
 
 const students: Data[] = [
     { name: 'Rajat Sandeep Sen', reg: '21/AD/051' },

@@ -6,10 +6,16 @@ export const QR = ({updateID}) => {
 
   return (
     <>
-      <QrReader
-        onResult={(result, error) => result && updateID(result?.text, result.getTimestamp())}
-        style={{ width: '100%' }}
+      <QrReader videoId='cam' className='video'
+        onResult={(result, error) => {
+            result && updateID(e => [
+              {regNo:result?.text, time:result.getTimestamp()},
+               ...e])
+          }
+        }
       />
     </>
   );
 };
+
+// , result.getTimestamp()
