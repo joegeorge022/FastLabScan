@@ -4,13 +4,13 @@ import { useEffect, useState } from 'react'
 import { Card } from "@/components/ui/card"
 import { useToast } from "@/components/ui/use-toast"
 
-import Header from '@/components/controller/header'
-import TableData from '@/components/controller/tableData'
+import Header from '@/module/controller/header'
+import TableData from '@/module/controller/tableData'
 import { timeDifference } from '@/lib/time'
 import { QRReturn } from '@/lib/types'
 
 
-export default function Home() {
+export default function Home2() {
   const {toast} = useToast()
   const [StudentData, setStudentData] = useState<QRReturn[]>([])
 

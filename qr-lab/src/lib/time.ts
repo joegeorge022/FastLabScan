@@ -34,3 +34,19 @@ export function timeDifference(previous : number) {
         return Math.round(elapsed/msPerYear ) + ' years ago';   
     }
 }
+
+export const hourUp = (startTime:string) => {
+        let x = startTime.split(':')
+
+        let hour = parseInt(x[0])
+        let endTime
+
+        if (hour === 23)
+            endTime = `00:` + x[1]
+        else if (hour < 9)
+            endTime = `0${hour + 1}:` + x[1]
+        else
+            endTime =`${hour + 1}:` + x[1]
+
+        return endTime
+}

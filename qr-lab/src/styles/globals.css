@@ -86,3 +86,22 @@
   position: unset!important;
   padding: unset!important;
 }
+
+.scrollbar {
+  &::-webkit-scrollbar {
+      width: 10px;
+  }
+  &::-webkit-scrollbar-track {
+      /* background: var(--grey);  */
+      border-radius: 10px;
+      padding: 1px;
+  }
+  &::-webkit-scrollbar-thumb {
+      margin: 1px;
+      background: #55555548; 
+      border-radius: 10px;
+    }
+  &::-webkit-scrollbar-thumb:hover {
+    background: #555; 
+  }
+}
