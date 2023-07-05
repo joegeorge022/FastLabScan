@@ -10,29 +10,23 @@ export function timeDifference(previous : number) {
 
     let elapsed = current - previous;
 
-    if (elapsed < msPerMinute) {
-         return Math.round(elapsed/1000) + ' sec ago';   
-    }
+    if (elapsed < msPerMinute)
+         return Math.round(elapsed/1000) + ' sec ago';
 
-    else if (elapsed < msPerHour) {
-         return Math.round(elapsed/msPerMinute) + ' min ago';   
-    }
+    else if (elapsed < msPerHour)
+         return Math.round(elapsed/msPerMinute) + ' min ago';
 
-    else if (elapsed < msPerDay ) {
-         return Math.round(elapsed/msPerHour ) + ' hours ago';   
-    }
+    else if (elapsed < msPerDay )
+         return Math.round(elapsed/msPerHour ) + ' hours ago';
 
-    else if (elapsed < msPerMonth) {
-        return Math.round(elapsed/msPerDay) + ' days ago';   
-    }
+    else if (elapsed < msPerMonth)
+        return Math.round(elapsed/msPerDay) + ' days ago';
 
-    else if (elapsed < msPerYear) {
-        return Math.round(elapsed/msPerMonth) + ' months ago';   
-    }
+    else if (elapsed < msPerYear)
+        return Math.round(elapsed/msPerMonth) + ' months ago';
 
-    else {
-        return Math.round(elapsed/msPerYear ) + ' years ago';   
-    }
+    else
+        return Math.round(elapsed/msPerYear ) + ' years ago';
 }
 
 export const hourUp = (startTime:string) => {

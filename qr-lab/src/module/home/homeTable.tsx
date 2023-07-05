@@ -1,12 +1,42 @@
+'use client'
+
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Card, CardContent } from "@/components/ui/card"
+import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog"
+import { Input } from "@/components/ui/input"
+import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
-import { timeDifference } from "@/lib/time"
+import { Attendence, User } from "@/lib/types"
 import { ChevronRight, X } from "lucide-react"
+import Link from "next/link"
+ 
+const ConfirmAction = ({action}: {action: ()=> void} ) => {
+  return ( 
+      <DialogContent>
+        <DialogHeader>
+          <DialogTitle>Confirm your action?</DialogTitle>
+          <DialogDescription> please provide your password to continue with action </DialogDescription>
+        </DialogHeader>
+
+          <div className="grid w-full items-center gap-4">
+            <div className="flex flex-col space-y-1.5">
+                <Label htmlFor="password">Password</Label>
+                <Input type="password" name="password" placeholder="**** ****" />
+            </div>
+          </div>
+
+          <DialogFooter>
+            <Button type="submit" onClick={action}>
+                Continue<ChevronRight />
+            </Button>
+          </DialogFooter>
+      </DialogContent>
+   );
+}
 
 
-const Row = (Props:any)=> {
-  const { dprt, total, present, time, date } = Props.data
+const Row = (Props:{data:Attendence})=> {
+  const { dprt, total, present, time, date }= Props.data
 
   return (
     <TableRow className=''>
@@ -27,23 +57,14 @@ const Row = (Props:any)=> {
 const data = [
   {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
   {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
 ]
 
-export default function HomeTable() {
+type Props = {
+  user: User,
+  setUser : (user:User | null) => void
+}
+export default function HomeTable(Props:Props) {
+  const user = Props.user
 
 
   return (
@@ -51,11 +72,18 @@ export default function HomeTable() {
       
       <Card>
         <CardContent className="p-2 flex justify-between gap-2">
-        <Button variant={'destructive'}>
-            Logout <X/>
-          </Button>
-          <Button className=" flex-grow">
-            Create new Attendence<ChevronRight/>
+            <Dialog>
+                <DialogTrigger asChild>
+                  <Button variant='destructive'>
+                    Logout <X/>
+                  </Button>
+                </DialogTrigger>
+
+                <ConfirmAction action={()=>Props.setUser(null)} />
+            </Dialog>
+
+          <Button className=" flex-grow" asChild>
+            <Link href={'/attendence'}>Create new Attendence<ChevronRight/></Link>
           </Button>
         </CardContent>
       </Card>

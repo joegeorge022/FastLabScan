@@ -1,21 +1,23 @@
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
+import { Checkbox } from "@/components/ui/checkbox"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
-import { Checkbox } from "@/components/ui/checkbox"
-import { useState, useEffect } from "react"
 import { hourUp } from "@/lib/time"
+import { deprtments } from "@/lib/types"
+import { dash } from "@/pages/attendence"
 import { ChevronRight } from "lucide-react"
+import Link from "next/link"
+import { SyntheticEvent, useEffect, useState } from "react"
 
-const deprtments = [
-    'AD', 'CSE', 'EEE', 'ECS', 'CYB', 'CE', 'ECE', 'ME', 'EI'
-]
 
 const timer = [ 5,10,15,20,25, 'Manual' ]
 
-
-export default function Create() {
+type Props = {
+  setDash: (dash:dash)=>void
+}
+export default function Create(Props:Props) {
     const [selectTimeEnd, setTimeEnd] = useState(false)
     const [endTime, setEndTime] = useState('')
     const [startTime, setStartTime] = useState('')
@@ -26,19 +28,37 @@ export default function Create() {
             
     }, [startTime, selectTimeEnd]);
 
+    function onSubmit(e:SyntheticEvent){
+        type input = { value : string }
+        type target = SyntheticEvent['target'] & {departments: input, timer :input }
+    
+        e.preventDefault()
+        const target = e.target as target
+
+        let data = {
+          
+          dprt: target.departments.value,
+          timer: target.timer.value,
+
+          starts:startTime,
+          ends:endTime
+        }
+
+        Props.setDash(data)
+    }
+
   return (
     <section className="w-full h-screen flex">
     <Card className="w-[350px] m-auto">
+      <form onSubmit={onSubmit}>
       <CardHeader>
         <CardTitle>Create Attendence</CardTitle>
-        {/* <CardDescription>Deploy your new project in one-click.</CardDescription> */}
       </CardHeader>
       <CardContent>
-        <form>
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
               <Label htmlFor="departments">Department</Label>
-              <Select name="departments">
+              <Select name="departments" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                   <SelectContent position="item-aligned">
@@ -59,12 +79,12 @@ export default function Create() {
             <div className="flex gap-3 justify-between">
                 <div className="w-full">
                     <Label htmlFor="timeS">Time Start</Label>
-                    <Input className="h-24 text-lg" type="time" name="timeS" 
+                    <Input className="h-24 text-lg" type="time" name="timeS" required
                         onChange={e => setStartTime(e.target.value)} value={startTime}/>
                 </div>
                 <div className="w-full">
                     <Label htmlFor="timeE">Time Ends</Label>
-                    <Input className="h-24 text-lg" type="time" name="timeE"
+                    <Input className="h-24 text-lg" type="time" name="timeE" required
                         value={endTime} disabled={!selectTimeEnd} onChange={e => setEndTime(e.target.value)} />
                 </div>
             </div>
@@ -73,7 +93,7 @@ export default function Create() {
 
             <div className="flex flex-col space-y-1.5 mt-5">
               <Label htmlFor="timer">Auto Close within</Label>
-              <Select name="timer">
+              <Select name="timer" required>
                 <SelectTrigger>
                   <SelectValue placeholder="Select" />
                   <SelectContent position='item-aligned'>
@@ -82,14 +102,18 @@ export default function Create() {
                 </SelectTrigger>
               </Select>
             </div>
-        </form>
       </CardContent>
       <CardFooter className="flex justify-between">
-        <Button variant="outline">Cancel</Button>
-        <Button>
+        <Button variant="outline" asChild>
+          <Link href={'/'}>
+          Cancel
+          </Link>
+        </Button>
+        <Button type="submit">
             Start Now<ChevronRight />
         </Button>
       </CardFooter>
+      </form>
     </Card>
     </section>
   )
