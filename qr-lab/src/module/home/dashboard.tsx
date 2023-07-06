@@ -52,18 +52,14 @@ export default function Dashboard(Props:Props) {
   }, []);
 
 
-
-
   useEffect(() => {
     const x = eachStudent ? readAndCheck(eachStudent, year, dprt, students,toast ) : null
-
     if (x) setList(e => [x,...e])
 
   }, [eachStudent]);
   
   return (
     <div className='p-5 h-dvh max-h-screen gap-5 grid grid-rows-6 md:grid-flow-col'>
-
       <Header />
 
       <Card className='p-0 overflow-hidden relative row-span-2 md:row-span-5 col-span-2'>
@@ -72,14 +68,14 @@ export default function Dashboard(Props:Props) {
       </Card>
 
       <TableData data={list} />
-
     </div>
   )
 }
 
 
+function upload(){}
+
 function readAndCheck(eachStudent:QRReturn, year:Year, dprt:Departments, localStorage:Students[], toast:(X:any)=>void){
-  
 
   const regNo = splitRegistration(eachStudent.regNo)
   if (!regNo || regNo.dprt !== dprt || getYear(regNo.year) !== year) return null

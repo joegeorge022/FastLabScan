@@ -13,7 +13,7 @@ export const useLocalStorage = <T>(key:string, initialValue:T) => {
       return initialValue;
     }
   });
-  // type func = (T:T) => T
+
   const setValue:typeof setStoredValue = (value) => {
     try {
       if (typeof value === "function") {

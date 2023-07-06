@@ -6,16 +6,11 @@ import { UseQrReaderHook } from './types';
 import { isMediaDevicesSupported, isValidType } from './utils';
 
 // TODO: add support for debug logs
-export const useQrReader: UseQrReaderHook = ({
-  scanDelay: delayBetweenScanAttempts,
-  constraints: video,
-  onResult,
-  videoId,
-}) => {
-  const controlsRef: MutableRefObject<IScannerControls> = useRef(null);
+export const useQrReader: UseQrReaderHook = ({ scanDelay: delayBetweenScanAttempts, constraints: video, onResult, videoId, }) => {
+  const controlsRef: MutableRefObject<IScannerControls | null> = useRef(null);
 
   useEffect(() => {
-    const codeReader = new BrowserQRCodeReader(null, {
+    const codeReader = new BrowserQRCodeReader(undefined, {
       delayBetweenScanAttempts,
     });
 
