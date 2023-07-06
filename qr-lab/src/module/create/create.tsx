@@ -5,19 +5,18 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue, } from "@/components/ui/select"
 import { hourUp } from "@/lib/time"
-import { deprtments } from "@/lib/types"
-import { dash } from "@/pages/attendence"
+import { Departments, Dash, deprtments } from "@/lib/types"
 import { ChevronRight } from "lucide-react"
 import Link from "next/link"
 import { SyntheticEvent, useEffect, useState } from "react"
+import { v4 as uuid } from 'uuid';
 
 
 const timer = [ 5,10,15,20,25, 'Manual' ]
 
-type Props = {
-  setDash: (dash:dash)=>void
-}
+type Props = { setDash: (dash:Dash)=>void }
 export default function Create(Props:Props) {
+
     const [selectTimeEnd, setTimeEnd] = useState(false)
     const [endTime, setEndTime] = useState('')
     const [startTime, setStartTime] = useState('')
@@ -30,19 +29,20 @@ export default function Create(Props:Props) {
 
     function onSubmit(e:SyntheticEvent){
         type input = { value : string }
-        type target = SyntheticEvent['target'] & {departments: input, timer :input }
+        type target = SyntheticEvent['target'] & {departments: input, timer :input, year :input }
     
         e.preventDefault()
         const target = e.target as target
 
         let data = {
-          
           dprt: target.departments.value,
+          year: parseInt(target.year.value),
           timer: target.timer.value,
 
           starts:startTime,
-          ends:endTime
-        }
+          ends:endTime,
+          id: uuid()
+        } as Dash
 
         Props.setDash(data)
     }
@@ -56,7 +56,10 @@ export default function Create(Props:Props) {
       </CardHeader>
       <CardContent>
           <div className="grid w-full items-center gap-4">
-            <div className="flex flex-col space-y-1.5">
+            <div className="flex gap-4 w-full justify-between">
+
+            
+            <div className="flex flex-col space-y-1.5 flex-grow">
               <Label htmlFor="departments">Department</Label>
               <Select name="departments" required>
                 <SelectTrigger>
@@ -66,6 +69,20 @@ export default function Create(Props:Props) {
                   </SelectContent>
                 </SelectTrigger>
               </Select>
+            </div>
+
+            <div className="flex flex-col space-y-1.5 flex-grow">
+              <Label htmlFor="year">Year</Label>
+              <Select name="year" required>
+                <SelectTrigger>
+                  <SelectValue placeholder="Select" />
+                  <SelectContent position="item-aligned">
+                    {[1,2,3,4].map((y)=> <SelectItem value={`${y}`}>{y}</SelectItem>)}
+                  </SelectContent>
+                </SelectTrigger>
+              </Select>
+            </div>
+
             </div>
 
             <div className="flex items-center space-x-1.5 my-5">

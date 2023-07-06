@@ -8,9 +8,7 @@ export const QR = ({action}) => {
     <>
       <QrReader videoId='cam' className='video'
         onResult={(result, error) => {
-            result && action(e => [
-              {regNo:result?.text, time:result.getTimestamp()},
-               ...e])
+            result && action({regNo:result?.text, time:result.getTimestamp()})
           }
         }
       />

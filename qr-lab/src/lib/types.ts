@@ -13,13 +13,13 @@ export interface RowData extends QRReturn {
 
 export type User = {
   name :  string,
-  dprt :  typeof DprtType[keyof typeof DprtType],
+  dprt :  Departments
   email : string,
-  workplace : typeof DprtType[keyof typeof DprtType],
+  workplace : Departments
 }
 
 export type Attendence = {
-  dprt: typeof DprtType[keyof typeof DprtType],
+  dprt: Departments
   total: number,
   present: number,
   time: string,
@@ -28,10 +28,19 @@ export type Attendence = {
 
 export type Students = {
   name: string,
-  regNo: string,
+  roll: number,
 }
 
-export type Deprtments = 'AD' | 'CSE' | 'EEE' | 'ECS' | 'CYB' | 'CE' | 'ECE' | 'ME' | 'EI'
+export type Dash = {     
+  dprt: User['dprt']
+  timer: string
+  starts: string
+  ends: string
+  id: string
+  year: 1 | 2 | 3 | 4
+}
+
+export type Departments = 'AD' | 'CSE' | 'EEE' | 'ECS' | 'CYB' | 'CE' | 'ECE' | 'ME' | 'EI'
 
 export const deprtments = [
   'AD', 'CSE', 'EEE', 'ECS', 'CYB', 'CE', 'ECE', 'ME', 'EI'
