@@ -27,6 +27,7 @@ const Dialoger = ()=> {
   }
 
 const Header = () => {
+  console.log(1)
     return ( 
     <Card className='col-span-2 row-span-1'>
         <CardHeader className='flex-row justify-between items-center p-4'>

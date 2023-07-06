@@ -7,8 +7,7 @@ export type QRReturn = {
   }
   
 export interface RowData extends QRReturn {
-    name: string,
-    dept: string,
+    name: string
 }
 
 export type User = {
@@ -37,9 +36,9 @@ export type Dash = {
   starts: string
   ends: string
   id: string
-  year: 1 | 2 | 3 | 4
+  year: Year
 }
-
+export type Year = 1 | 2 | 3 | 4
 export type Departments = 'AD' | 'CSE' | 'EEE' | 'ECS' | 'CYB' | 'CE' | 'ECE' | 'ME' | 'EI'
 
 export const deprtments = [

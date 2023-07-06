@@ -1,7 +1,7 @@
 import { useState } from "react";
 
-export const useLocalStorage = <T>(key:string, initialValue:T | {}) => {
-  const [storedValue, setStoredValue] = useState(() => {
+export const useLocalStorage = <T>(key:string, initialValue:T) => {
+  const [storedValue, setStoredValue] = useState<T>(() => {
     if (typeof window === "undefined") {
       return initialValue;
     }
@@ -13,10 +13,14 @@ export const useLocalStorage = <T>(key:string, initialValue:T | {}) => {
       return initialValue;
     }
   });
-
-  const setValue = (value:any) => {
+  // type func = (T:T) => T
+  const setValue:typeof setStoredValue = (value) => {
     try {
-      setStoredValue(value);
+      if (typeof value === "function") {
+          
+        setStoredValue(value);
+      }
+      else setStoredValue(value);
 
       if (typeof window !== "undefined") {
         if (value === null) localStorage.removeItem(key);
@@ -26,5 +30,5 @@ export const useLocalStorage = <T>(key:string, initialValue:T | {}) => {
       console.log(error);
     }
   };
-  return [storedValue, setValue];
+  return [storedValue, setValue] as [T , typeof setValue];
 };

@@ -20,3 +20,8 @@ export function splitRegistration(reg: string | null) {
   
   return null
 }
+
+export function getYear(year:number) {
+  let x = new Date().getFullYear()
+  return x - 2000 - year
+}

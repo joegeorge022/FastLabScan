@@ -7,21 +7,21 @@ import { useToast } from "@/components/ui/use-toast"
 import Header from '@/module/controller/header'
 import TableData from '@/module/controller/tableData'
 import { timeDifference } from '@/lib/time'
-import { QRReturn, Students, Departments, Dash } from '@/lib/types'
+import { QRReturn, Students, Departments, Dash, Year, RowData } from '@/lib/types'
 import { useLocalStorage } from '@/lib/custom-hooks'
-import { splitRegistration } from '@/lib/utils'
+import { getYear, splitRegistration } from '@/lib/utils'
 
 
 
 type Propper = {
   students:Students[],
-  setStudents:(data:Students[])=>void,
+  setStudents:any
   year: Dash['year'],
   dprt: Dash['dprt'],
 }
 function fetchStudentData(Propper:Propper){
-
-  if (Propper.students === null){
+  // fetch the data
+  if (Propper.students.length === 0){
     let data:Students[] = [
       {name: 'Pranav', roll: 49},
       {name: 'Prithvi', roll: 50},
@@ -40,8 +40,9 @@ function fetchStudentData(Propper:Propper){
 type Props = { dash : Dash }
 export default function Dashboard(Props:Props) {
   const {dprt, ends, starts, timer, id, year} = Props.dash
-  const [students, setStudents] = useLocalStorage<Students[] | null>(dprt, null)
-  const [list, setList] = useState([])
+  const [students, setStudents] = useLocalStorage<Students[]>(`${year}/${dprt}`, [])
+
+  const [list, setList] = useLocalStorage<RowData[]>(`${year}/${dprt}`,[])
   const [eachStudent, setEachStudent] = useState<QRReturn | null>(null)
 
   const {toast} = useToast()
@@ -55,7 +56,9 @@ export default function Dashboard(Props:Props) {
 
   useEffect(() => {
     const x = eachStudent ? readAndCheck(eachStudent, year, dprt, students,toast ) : null
-    console.log(x)
+
+    if (x) setList(e => [x,...e])
+
   }, [eachStudent]);
   
   return (
@@ -68,19 +71,18 @@ export default function Dashboard(Props:Props) {
           <div className=' absolute border-black-500 border border-dashed rounded-sm left-3 right-3 top-3 bottom-3'></div>
       </Card>
 
-      <TableData data={[]} />
+      <TableData data={list} />
 
     </div>
   )
 }
 
 
-function readAndCheck(eachStudent:QRReturn, year:number, dprt:Departments, localStorage:Students[], toast:(X:any)=>void){
+function readAndCheck(eachStudent:QRReturn, year:Year, dprt:Departments, localStorage:Students[], toast:(X:any)=>void){
   
 
   const regNo = splitRegistration(eachStudent.regNo)
-  console.log(regNo,dprt,year)
-  if (!regNo || regNo.dprt !== dprt ) return null
+  if (!regNo || regNo.dprt !== dprt || getYear(regNo.year) !== year) return null
   
 
   const found = localStorage.find(student => student.roll === regNo.roll);
@@ -89,7 +91,7 @@ function readAndCheck(eachStudent:QRReturn, year:number, dprt:Departments, local
 
   toast({
     title: found.name,
-    description: `${timeDifference(eachStudent.time)}`,
+    description: eachStudent.regNo,
     variant: 'success',
     itemID: `${eachStudent.time}`
   })
@@ -98,5 +100,5 @@ function readAndCheck(eachStudent:QRReturn, year:number, dprt:Departments, local
     time: eachStudent.time,
     name: found.name,
     regNo: eachStudent.regNo
-  }
+  } as RowData
 }
