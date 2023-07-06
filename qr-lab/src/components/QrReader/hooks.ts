@@ -14,12 +14,8 @@ export const useQrReader: UseQrReaderHook = ({ scanDelay: delayBetweenScanAttemp
       delayBetweenScanAttempts,
     });
 
-    if (
-      !isMediaDevicesSupported() &&
-      isValidType(onResult, 'onResult', 'function')
-    ) {
-      const message =
-        'MediaDevices API has no support for your browser. You can fix this by running "npm i webrtc-adapter"';
+    if ( !isMediaDevicesSupported() && isValidType(onResult, 'onResult', 'function') ) {
+      const message = 'MediaDevices API has no support for your browser. You can fix this by running "npm i webrtc-adapter"';
 
       onResult(null, new Error(message), codeReader);
     }

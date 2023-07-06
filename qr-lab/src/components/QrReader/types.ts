@@ -9,7 +9,7 @@ export type QrReaderProps = {
   /**
    * Called when an error occurs.
    */
-  onResult?: OnResultFunction;
+  onResult: OnResultFunction;
   /**
    * Property that represents the view finder component
    */
@@ -63,7 +63,7 @@ export type UseQrReaderHookProps = {
   /**
    * Callback for retrieving the result
    */
-  onResult?: OnResultFunction;
+  onResult: OnResultFunction;
   /**
    * Property that represents the scan period
    */

@@ -73,7 +73,7 @@ export default function Dashboard(Props:Props) {
 }
 
 
-function upload(){}
+// function upload(){}
 
 function readAndCheck(eachStudent:QRReturn, year:Year, dprt:Departments, localStorage:Students[], toast:(X:any)=>void){
 

@@ -18,6 +18,7 @@ export type User = {
 }
 
 export type Attendence = {
+  id: string,
   dprt: Departments
   total: number,
   present: number,

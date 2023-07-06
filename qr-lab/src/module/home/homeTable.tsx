@@ -9,6 +9,7 @@ import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@
 import { Attendence, User } from "@/lib/types"
 import { ChevronRight, X } from "lucide-react"
 import Link from "next/link"
+import { v4 as uuid } from "uuid"
  
 const ConfirmAction = ({action}: {action: ()=> void} ) => {
   return ( 
@@ -54,9 +55,9 @@ const Row = (Props:{data:Attendence})=> {
   )
 }
 
-const data = [
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
-  {id: '1233',dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
+const data:Attendence[] = [
+  {id: uuid(),dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
+  {id: uuid(),dprt: 'AD', total: 61, present: 51, time: '15:00', date:'15-06-23'},
 ]
 
 type Props = {
