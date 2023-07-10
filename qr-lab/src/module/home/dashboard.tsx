@@ -1,3 +1,5 @@
+'use client'
+
 import { QR } from '@/components/qr'
 import { useEffect, useState } from 'react'
 
@@ -10,6 +12,9 @@ import { timeDifference } from '@/lib/time'
 import { QRReturn, Students, Departments, Dash, Year, RowData } from '@/lib/types'
 import { useLocalStorage } from '@/lib/custom-hooks'
 import { getYear, splitRegistration } from '@/lib/utils'
+
+import Html5QrcodePlugin from '@/components/setQR'
+
 
 
 
@@ -34,7 +39,12 @@ function fetchStudentData(Propper:Propper){
 }
 
 
+const removeSpace = (x : string)=> {
 
+  let y = x.split(' ')
+  return y.join('-')
+
+}
 
 
 type Props = { dash : Dash }
@@ -42,10 +52,12 @@ export default function Dashboard(Props:Props) {
   const {dprt, ends, starts, timer, id, year} = Props.dash
   const [students, setStudents] = useLocalStorage<Students[]>(`${year}/${dprt}`, [])
 
-  const [list, setList] = useLocalStorage<RowData[]>(`${year}/${dprt}`,[])
+  const [list, setList] = useLocalStorage<RowData[]>(`${year}/${dprt}/${removeSpace(new Date().toDateString())}/`,[])
   const [eachStudent, setEachStudent] = useState<QRReturn | null>(null)
 
+  const onScanSuccess = (decodedText:string,decodedResult:any)=> setEachStudent({regNo:decodedText, time: new Date().getTime() })
   const {toast} = useToast()
+  
 
   useEffect(() => {
     fetchStudentData({students, setStudents, year, dprt})
@@ -57,14 +69,16 @@ export default function Dashboard(Props:Props) {
     if (x) setList(e => [x,...e])
 
   }, [eachStudent]);
+
   
   return (
     <div className='p-5 h-dvh max-h-screen gap-5 grid grid-rows-6 md:grid-flow-col'>
       <Header />
 
       <Card className='p-0 overflow-hidden relative row-span-2 md:row-span-5 col-span-2'>
-          {students !== null && <QR action={setEachStudent} />}
-          <div className=' absolute border-black-500 border border-dashed rounded-sm left-3 right-3 top-3 bottom-3'></div>
+          
+          {students !== null && <Html5QrcodePlugin onScanSuccess={onScanSuccess}/>}
+          <div className=' -z-10 absolute border-black-500 border border-dashed rounded-sm left-3 right-3 top-3 bottom-3'></div>
       </Card>
 
       <TableData data={list} />

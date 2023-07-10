@@ -105,3 +105,21 @@
     background: #555; 
   }
 }
+
+#qrreaderdiv {
+  height: 100%!important;
+  width: 100%!important;
+  border-width: 0px!important;
+  video {
+    height: 100%!important;
+    width: 100%!important;
+  }
+
+  video + video {
+    display: none!important;
+  }
+  img {
+    display: none!important;
+  }
+
+}

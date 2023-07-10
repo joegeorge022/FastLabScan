@@ -7,9 +7,16 @@ export const useLocalStorage = <T>(key:string, initialValue:T) => {
     }
     try {
       const item = localStorage.getItem(key);
-      return item ? JSON.parse(item) : initialValue;
+      // return item ? JSON.parse(item) : initialValue;
+      if (item) {
+        return JSON.parse(item);
+      }
+      else {
+        localStorage.setItem(key, JSON.stringify(initialValue))
+        return initialValue
+      }
     } catch (error) {
-      console.log(error);
+      console.warn(error);
       return initialValue;
     }
   });
@@ -17,17 +24,19 @@ export const useLocalStorage = <T>(key:string, initialValue:T) => {
   const setValue:typeof setStoredValue = (value) => {
     try {
       if (typeof value === "function") {
-          
         setStoredValue(value);
+        localStorage.setItem(key, JSON.stringify(storedValue));
       }
-      else setStoredValue(value);
+      else {
+        setStoredValue(value);
+        if (typeof window !== "undefined") {
+          if (value === null) localStorage.removeItem(key);
+          else localStorage.setItem(key, JSON.stringify(value));
+        }
+      }
 
-      if (typeof window !== "undefined") {
-        if (value === null) localStorage.removeItem(key);
-        else localStorage.setItem(key, JSON.stringify(value));
-      }
     } catch (error) {
-      console.log(error);
+      console.warn(error);
     }
   };
   return [storedValue, setValue] as [T , typeof setValue];
