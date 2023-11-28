@@ -2,14 +2,22 @@ import { Button } from "@/components/ui/button"
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle, } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { supabase } from "@/lib/supabase"
 import { User } from "@/lib/types"
-import { ChevronRight } from "lucide-react"
+import { Separator } from "@radix-ui/react-select"
+import { ChevronRight, Github } from "lucide-react"
 import { SyntheticEvent } from "react"
 
-type Props = {
-  setUser : (user:User) => void
+async function signInWithGithub() {
+  const { data, error } = await supabase.auth.signInWithOAuth({
+    provider: 'github',
+    options: {
+      redirectTo: `http://localhost:3000/sjcet`
+    }
+  })
 }
-export default function Login(Props:Props) {
+
+export default function Login() {
 
   const onSubmit = (e:SyntheticEvent) => {
     type input = { value : string }
@@ -26,7 +34,6 @@ export default function Login(Props:Props) {
       name : 'rajat' as string
     }
 
-    Props.setUser(user)
     console.log(user)
   }
 
@@ -50,12 +57,19 @@ export default function Login(Props:Props) {
             </div>
           </div>
       </CardContent>
-      <CardFooter className="flex justify-end">
+      <CardFooter className="flex justify-between gap-3">
         <Button type="submit">
             Login<ChevronRight />
         </Button>
       </CardFooter>
         </form>
+        <Separator className="my-4" />
+        <CardFooter className="flex justify-between gap-3">
+
+        <Button className="gap-1" onClick={()=> signInWithGithub()}>
+            Login with Github <Github size={20} />
+        </Button>
+        </CardFooter>
     </Card>
     </section>
   )

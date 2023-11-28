@@ -67,6 +67,12 @@ export default function Dashboard(Props:Props) {
   useEffect(() => {
     const x = eachStudent ? readAndCheck(eachStudent, year, dprt, students,toast ) : null
     if (x) setList(e => [x,...e])
+    else toast({
+      title: 'Wrong QR',
+      description: 'Please scan the correct QR',
+      variant: 'destructive',
+      // itemID: `${eachStudent.time}`
+    })
 
   }, [eachStudent]);
 

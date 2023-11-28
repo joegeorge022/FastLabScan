@@ -113,6 +113,8 @@
   video {
     height: 100%!important;
     width: 100%!important;
+    transform: rotateY(180deg);
+
   }
 
   video + video {

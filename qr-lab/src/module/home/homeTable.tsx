@@ -6,6 +6,7 @@ import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, D
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table"
+import { supabase } from "@/lib/supabase"
 import { Attendence, User } from "@/lib/types"
 import { ChevronRight, X } from "lucide-react"
 import Link from "next/link"
@@ -22,7 +23,7 @@ const ConfirmAction = ({action}: {action: ()=> void} ) => {
           <div className="grid w-full items-center gap-4">
             <div className="flex flex-col space-y-1.5">
                 <Label htmlFor="password">Password</Label>
-                <Input type="password" name="password" placeholder="**** ****" />
+                <Input type="password" name="password" placeholder="**** ****" className="valid:bg-green-500" required />
             </div>
           </div>
 
@@ -61,11 +62,13 @@ const data:Attendence[] = [
 ]
 
 type Props = {
-  user: User,
-  setUser : (user:User | null) => void
 }
 export default function HomeTable(Props:Props) {
-  const user = Props.user
+  const setUser = (...a:any[]) => {}
+
+  async function signOut() {
+    const { error } = await supabase.auth.signOut()
+  }
 
 
   return (
@@ -75,12 +78,12 @@ export default function HomeTable(Props:Props) {
         <CardContent className="p-2 flex justify-between gap-2">
             <Dialog>
                 <DialogTrigger asChild>
-                  <Button variant='destructive'>
+                  <Button variant='destructive' onClick={() => signOut()}>
                     Logout <X/>
                   </Button>
                 </DialogTrigger>
 
-                <ConfirmAction action={()=>Props.setUser(null)} />
+                <ConfirmAction action={()=>setUser(null)} />
             </Dialog>
 
           <Button className=" flex-grow" asChild>
