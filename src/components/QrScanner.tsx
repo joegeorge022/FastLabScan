@@ -2,6 +2,7 @@
 
 import { Html5QrcodeScanner } from "html5-qrcode";
 import { useEffect, useState } from "react";
+import type { ReactElement } from 'react';
 
 interface Props {
   onScan: (regNo: string) => void;
@@ -9,7 +10,7 @@ interface Props {
   onSessionEnd: () => void;
 }
 
-export function QrScanner({ onScan, duration, onSessionEnd }: Props) {
+export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactElement {
   const [timeLeft, setTimeLeft] = useState(duration * 60);
 
   useEffect(() => {
@@ -24,14 +25,14 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props) {
       (decodedText: string) => {
         onScan(decodedText);
       },
-      (error: any) => {
+      (error: unknown) => {
         // Log errors for debugging but don't show to user
         console.debug('QR Scanner error:', error);
       }
     );
 
     const timer = setInterval(() => {
-      setTimeLeft((prev) => {
+      setTimeLeft((prev: number) => {
         if (prev <= 1) {
           clearInterval(timer);
           scanner.clear();
