@@ -25,7 +25,8 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props) {
         onScan(decodedText);
       },
       (error: any) => {
-        // Ignore errors
+        // Log errors for debugging but don't show to user
+        console.debug('QR Scanner error:', error);
       }
     );
 
@@ -41,6 +42,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props) {
       });
     }, 1000);
 
+    // Cleanup on unmount
     return () => {
       clearInterval(timer);
       scanner.clear();
