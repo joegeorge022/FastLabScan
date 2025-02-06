@@ -6,6 +6,7 @@ export interface SessionConfig {
   department: string;
   year: number;
   duration: number;
+  totalStudents: number;
 }
 
 interface Props {
@@ -26,7 +27,8 @@ export function SetupScreen({ onStart }: Props) {
   const [config, setConfig] = useState<SessionConfig>({
     department: DEPARTMENTS[0],
     year: YEARS[0],
-    duration: DURATIONS[0].value
+    duration: DURATIONS[0].value,
+    totalStudents: 50
   });
 
   return (
@@ -50,17 +52,21 @@ export function SetupScreen({ onStart }: Props) {
               </label>
               <div className="relative">
                 <select
-                  className="appearance-none block w-full px-4 py-4 text-xl bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
                   value={config.department}
                   onChange={(e) => setConfig(prev => ({ ...prev, department: e.target.value }))}
                 >
                   {DEPARTMENTS.map(dept => (
-                    <option key={dept} value={dept} className="py-2">
+                    <option 
+                      key={dept} 
+                      value={dept} 
+                      className="py-2 text-gray-900 font-medium"
+                    >
                       {dept}
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-600">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -79,16 +85,34 @@ export function SetupScreen({ onStart }: Props) {
                     key={year}
                     type="button"
                     onClick={() => setConfig(prev => ({ ...prev, year }))}
-                    className={`py-4 text-xl font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 ${
+                    className={`py-4 text-xl font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
                       config.year === year
-                        ? 'bg-blue-600 text-white'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
+                        ? 'bg-blue-600 text-white shadow-md'
+                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
                     }`}
                   >
                     {year}
                   </button>
                 ))}
               </div>
+            </div>
+
+            {/* Student Count Input */}
+            <div>
+              <label className="block text-lg font-semibold text-gray-700 mb-2">
+                Number of Students
+              </label>
+              <input
+                type="number"
+                min="1"
+                max="100"
+                value={config.totalStudents}
+                onChange={(e) => setConfig(prev => ({ 
+                  ...prev, 
+                  totalStudents: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
+                }))}
+                className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
+              />
             </div>
 
             {/* Duration Selection */}
@@ -98,17 +122,21 @@ export function SetupScreen({ onStart }: Props) {
               </label>
               <div className="relative">
                 <select
-                  className="appearance-none block w-full px-4 py-4 text-xl bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                  className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
                   value={config.duration}
                   onChange={(e) => setConfig(prev => ({ ...prev, duration: Number(e.target.value) }))}
                 >
                   {DURATIONS.map(({ value, label }) => (
-                    <option key={value} value={value} className="py-2">
+                    <option 
+                      key={value} 
+                      value={value} 
+                      className="py-2 text-gray-900 font-medium"
+                    >
                       {label}
                     </option>
                   ))}
                 </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-gray-700">
+                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-600">
                   <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
                   </svg>
@@ -119,7 +147,7 @@ export function SetupScreen({ onStart }: Props) {
             {/* Start Button */}
             <button
               onClick={() => onStart(config)}
-              className="w-full flex justify-center py-5 px-4 border border-transparent rounded-xl shadow-sm text-2xl font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              className="w-full flex justify-center py-5 px-4 border border-transparent rounded-xl shadow-md text-2xl font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
             >
               Start Scanning
             </button>
@@ -129,7 +157,7 @@ export function SetupScreen({ onStart }: Props) {
         {/* Instructions */}
         <div className="mt-8 text-center text-gray-600">
           <p className="text-base">
-            Select department and year, then set duration.<br/>
+            Select department and year, set student count and duration.<br/>
             Students can start scanning their IDs once session begins.
           </p>
         </div>

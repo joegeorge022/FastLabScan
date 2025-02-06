@@ -26,10 +26,10 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       qrbox: { width: 250, height: 250 },
       rememberLastUsedCamera: true,
       aspectRatio: 1,
-      defaultDeviceId: preferredCamera || 'environment',
+      defaultDeviceId: preferredCamera || undefined,
       showTorchButtonIfSupported: true,
       videoConstraints: {
-        facingMode: "environment",
+        facingMode: { ideal: "environment" },
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 480, ideal: 720, max: 1080 }
       }
@@ -37,40 +37,20 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
 
     scannerRef.current = scanner;
 
-    // Handle camera selection
-    setTimeout(() => {
-      const cameraSelect = document.querySelector('#qr-reader select') as HTMLSelectElement;
-      if (cameraSelect) {
-        cameraSelect.addEventListener('change', (e) => {
-          const selectedCamera = (e.target as HTMLSelectElement).value;
-          localStorage.setItem(CAMERA_STORAGE_KEY, selectedCamera);
-        });
-      }
-    }, 1000);
-
-    // Start scanning
     scanner.render(
       (decodedText: string) => {
-        // Prevent multiple scans of the same code in quick succession
-        if (decodedText === lastScanned) {
-          return;
-        }
+        if (decodedText === lastScanned) return;
 
-        // Vibrate if supported
         if ('vibrate' in navigator) {
           navigator.vibrate(100);
         }
 
-        // Add a success sound
         const audio = new Audio('/sounds/beep.mp3');
-        audio.play().catch(() => {
-          // Ignore audio play errors
-        });
+        audio.play().catch(() => {});
 
         setLastScanned(decodedText);
         onScan(decodedText);
 
-        // Reset lastScanned after a delay to allow scanning the same code again
         setTimeout(() => {
           setLastScanned(null);
         }, 2000);
@@ -80,12 +60,10 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       }
     );
 
-    // Set initialized after a short delay
     const initTimeout = setTimeout(() => {
       setIsInitialized(true);
     }, 1000);
 
-    // Cleanup function
     return () => {
       clearTimeout(initTimeout);
       if (scannerRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
@@ -93,9 +71,8 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       }
       scannerRef.current = null;
     };
-  }, [onScan, lastScanned]); // Only re-initialize if scan handler changes
+  }, [onScan, lastScanned]);
 
-  // Timer effect
   useEffect(() => {
     const timer = setInterval(() => {
       setTimeLeft((prev: number) => {
@@ -122,41 +99,43 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
 
   return (
     <div className="space-y-4">
-      {/* Timer Display */}
-      <div className="relative pt-1">
+      <div className="bg-white rounded-lg p-4 shadow-sm">
         <div className="flex items-center justify-between mb-2">
-          <div className="text-xl font-bold text-gray-900">
+          <div className="text-2xl font-bold text-gray-900">
             {minutes}:{seconds.toString().padStart(2, '0')}
           </div>
-          <div className="text-sm text-gray-600">
-            Session {duration} min
+          <div className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
+            {duration} min session
           </div>
         </div>
-        <div className="overflow-hidden h-2 text-xs flex rounded bg-gray-200">
+        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
           <div 
             style={{ width: `${timePercentage}%` }}
-            className="shadow-none flex flex-col text-center whitespace-nowrap text-white justify-center bg-blue-500 transition-all duration-500"
+            className="h-full bg-blue-600 transition-all duration-500"
           />
         </div>
       </div>
 
-      {/* Scanner */}
-      <div 
-        id="qr-reader" 
-        className={`mx-auto transition-opacity duration-300 ${isInitialized ? 'opacity-100' : 'opacity-0'}`} 
-      />
-
-      {/* Instructions */}
-      <div className="text-center text-sm text-gray-600">
-        Point the camera at a student's ID QR code
+      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+        <div 
+          id="qr-reader" 
+          className={`transition-opacity duration-300 ${isInitialized ? 'opacity-100' : 'opacity-0'}`} 
+        />
       </div>
 
-      {/* Last Scanned Feedback */}
-      {lastScanned && (
-        <div className="text-center text-sm text-green-600 font-medium animate-fade-out">
-          Successfully scanned!
+      <div className="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
+        <div className="max-w-md mx-auto">
+          {lastScanned ? (
+            <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg text-center animate-fade-out">
+              ✓ Successfully scanned!
+            </div>
+          ) : (
+            <div className="bg-white/90 backdrop-blur-sm text-gray-600 px-4 py-3 rounded-lg shadow-lg text-center">
+              Point camera at student's ID QR code
+            </div>
+          )}
         </div>
-      )}
+      </div>
     </div>
   );
 } 
