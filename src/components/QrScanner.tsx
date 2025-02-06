@@ -19,6 +19,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       qrbox: { width: 250, height: 250 },
       rememberLastUsedCamera: true,
       aspectRatio: 1,
+      defaultDeviceId: 'environment'
     }, false);
 
     scanner.render(
