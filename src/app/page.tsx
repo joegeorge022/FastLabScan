@@ -7,6 +7,7 @@ import { useSessions, downloadSession } from '@/hooks/useSessions';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
 
 interface Student {
   regNo: string;
@@ -29,6 +30,7 @@ export default function Home() {
   const { saveSession } = useSessions();
   const [session, setSession] = useState<ActiveSession | null>(null);
   const [showScanner, setShowScanner] = useState(true);
+  const { showToast } = useToast();
 
   const handleStart = (config: SessionConfig) => {
     setSession({
@@ -57,6 +59,9 @@ export default function Home() {
         students: [...prev.students, newStudent]
       };
     });
+
+    // Show toast
+    showToast(`✓ Scanned: ${regNo}`);
   };
 
   // Calculate number of rows needed based on student count
@@ -150,132 +155,150 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-background">
-      {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
-        <div className="max-w-7xl mx-auto px-4 py-3">
-          <div className="flex items-center justify-between">
-            <div>
-              <h1 className="text-lg font-bold">
-                {session?.department} - Year {session?.year}
-              </h1>
-              <p className="text-sm text-muted-foreground">Attendance Session</p>
-            </div>
-            <div className="flex items-center gap-4">
-              <div className="bg-primary/10 px-4 py-2 rounded-lg">
-                <div className="text-xs text-primary font-medium">Present</div>
-                <div className="text-xl font-bold text-primary">{session?.students.length}</div>
+    <>
+      <div className="min-h-screen bg-background">
+        {/* Fixed Header */}
+        <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
+          <div className="max-w-7xl mx-auto px-4 py-3">
+            <div className="flex items-center justify-between">
+              <div>
+                <h1 className="text-lg font-bold">
+                  {session?.department} - Year {session?.year}
+                </h1>
+                <p className="text-sm text-muted-foreground">Attendance Session</p>
               </div>
-              
-              {/* Desktop Download Button */}
-              <Button
-                onClick={handleDownload}
-                variant="outline"
-                className="hidden sm:flex items-center gap-2"
-              >
-                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                </svg>
-                Export CSV
-              </Button>
-
-              {/* Mobile Toggle Button */}
-              <Button
-                variant="outline"
-                onClick={() => setShowScanner(prev => !prev)}
-                className="lg:hidden"
-              >
-                {showScanner ? "View Seats" : "Scan QR"}
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Content */}
-      <div className="pt-20 pb-16 px-4">
-        <div className="max-w-7xl mx-auto">
-          <div className="lg:grid lg:grid-cols-2 lg:gap-6">
-            {/* Scanner Section */}
-            <div className={`transition-all duration-300 ${
-              showScanner ? 'block' : 'hidden lg:block'
-            }`}>
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-4 border-b">
-                  <h2 className="text-lg font-semibold text-gray-900">Scanner</h2>
+              <div className="flex items-center gap-4">
+                <div className="bg-primary/10 px-4 py-2 rounded-lg">
+                  <div className="text-xs text-primary font-medium">Present</div>
+                  <div className="text-xl font-bold text-primary">{session?.students.length}</div>
                 </div>
-                <QrScanner 
-                  onScan={handleScan}
-                  duration={session.duration}
-                  onSessionEnd={handleSessionEnd}
-                />
-              </div>
-            </div>
-
-            {/* Attendance Overview Section */}
-            <div className={`transition-all duration-300 ${
-              !showScanner ? 'block' : 'hidden lg:block'
-            }`}>
-              <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                <div className="p-4 border-b flex justify-between items-center">
-                  <h2 className="text-lg font-semibold text-gray-900">Attendance Overview</h2>
-                  {/* Mobile Download Button */}
-                  <button
+                
+                {/* Only Export and Toggle buttons remain in header */}
+                <div className="flex items-center gap-2">
+                  <Button
                     onClick={handleDownload}
-                    className="sm:hidden flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+                    variant="outline"
+                    className="hidden sm:flex items-center gap-2"
                   >
                     <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                     </svg>
-                    Export
-                  </button>
-                </div>
-                
-                {/* Seat Layout */}
-                {renderSeatLayout()}
+                    Export CSV
+                  </Button>
 
-                {/* Recent Scans List */}
-                <div className="border-t">
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* Main Content */}
+        <div className="pt-20 pb-16 px-4">
+          <div className="max-w-7xl mx-auto">
+            <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+              {/* Scanner Section */}
+              <div className={`transition-all duration-300 ${
+                showScanner ? 'block' : 'hidden lg:block'
+              }`}>
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="p-4 border-b">
-                    <h3 className="text-sm font-medium text-gray-700">Recent Scans</h3>
+                    <h2 className="text-lg font-semibold text-gray-900">Scanner</h2>
                   </div>
-                  <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-100">
-                    {session.students.length === 0 ? (
-                      <div className="px-4 py-8 text-center text-gray-500">
-                        No students scanned yet
-                      </div>
-                    ) : (
-                      session.students.map((student) => (
-                        <div 
-                          key={student.regNo}
-                          className="px-4 py-2 flex justify-between items-center hover:bg-gray-50"
-                        >
-                          <div className="font-medium text-gray-900">{student.regNo}</div>
-                          <div className="text-sm text-gray-500">
-                            {new Date(student.timestamp).toLocaleTimeString()}
-                          </div>
+                  <QrScanner 
+                    onScan={handleScan}
+                    duration={session.duration}
+                    onSessionEnd={handleSessionEnd}
+                  />
+                </div>
+              </div>
+
+              {/* Attendance Overview Section */}
+              <div className={`transition-all duration-300 ${
+                !showScanner ? 'block' : 'hidden lg:block'
+              }`}>
+                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
+                  <div className="p-4 border-b flex justify-between items-center">
+                    <h2 className="text-lg font-semibold text-gray-900">Attendance Overview</h2>
+                    {/* Mobile Download Button */}
+                    <button
+                      onClick={handleDownload}
+                      className="sm:hidden flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      Export
+                    </button>
+                  </div>
+                  
+                  {/* Seat Layout */}
+                  {renderSeatLayout()}
+
+                  {/* Recent Scans List */}
+                  <div className="border-t">
+                    <div className="p-4 border-b">
+                      <h3 className="text-sm font-medium text-gray-700">Recent Scans</h3>
+                    </div>
+                    <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-100">
+                      {session.students.length === 0 ? (
+                        <div className="px-4 py-8 text-center text-gray-500">
+                          No students scanned yet
                         </div>
-                      )).reverse()
-                    )}
+                      ) : (
+                        session.students.map((student) => (
+                          <div 
+                            key={student.regNo}
+                            className="px-4 py-2 flex justify-between items-center hover:bg-gray-50"
+                          >
+                            <div className="font-medium text-gray-900">{student.regNo}</div>
+                            <div className="text-sm text-gray-500">
+                              {new Date(student.timestamp).toLocaleTimeString()}
+                            </div>
+                          </div>
+                        )).reverse()
+                      )}
+                    </div>
                   </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Legend */}
-      <div className="mt-4 flex justify-center gap-4 text-sm">
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-green-100 rounded"></div>
-          <span className="text-green-800">Present</span>
+        {/* Legend */}
+        <div className="mt-4 flex justify-center gap-4 text-sm">
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-green-100 rounded"></div>
+            <span className="text-green-800">Present</span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+            <span className="text-red-700">Absent</span>
+          </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
-          <span className="text-red-700">Absent</span>
+
+        {/* New Fixed Bottom Bar */}
+        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
+          <div className="max-w-7xl mx-auto px-4 py-4">
+            <div className="flex justify-center">
+              <Button
+                onClick={handleSessionEnd}
+                variant="destructive"
+                size="lg"
+                className="w-full max-w-sm flex items-center justify-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                </svg>
+                End Session
+              </Button>
+            </div>
+          </div>
         </div>
+
+        {/* Add padding to prevent content from being hidden behind the bottom bar */}
+        <div className="h-20"></div>
       </div>
-    </div>
+    </>
   );
 }

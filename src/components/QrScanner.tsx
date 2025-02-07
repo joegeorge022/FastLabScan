@@ -28,10 +28,10 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       qrbox: { width: 250, height: 250 },
       rememberLastUsedCamera: true,
       aspectRatio: 1,
-      defaultDeviceId: preferredCamera || undefined,
+      cameraId: preferredCamera || undefined,
       showTorchButtonIfSupported: true,
       videoConstraints: {
-        facingMode: { ideal: "environment" },
+        facingMode: { ideal: "user" },
         width: { min: 640, ideal: 1280, max: 1920 },
         height: { min: 480, ideal: 720, max: 1080 }
       }
@@ -123,24 +123,6 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
           />
         </CardContent>
       </Card>
-
-      <div className="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
-        <div className="max-w-md mx-auto">
-          {lastScanned ? (
-            <Card className="bg-green-500 text-white animate-fade-out border-none">
-              <CardContent className="p-3 text-center">
-                ✓ Successfully scanned!
-              </CardContent>
-            </Card>
-          ) : (
-            <Card className="bg-background/90 backdrop-blur-sm">
-              <CardContent className="p-3 text-center text-muted-foreground">
-                Point camera at student's ID QR code
-              </CardContent>
-            </Card>
-          )}
-        </div>
-      </div>
     </div>
   );
 } 
