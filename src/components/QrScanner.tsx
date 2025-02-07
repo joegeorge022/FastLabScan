@@ -3,6 +3,8 @@
 import { Html5QrcodeScanner, Html5QrcodeScannerState } from "html5-qrcode";
 import { useEffect, useState, useRef } from "react";
 import type { ReactElement } from 'react';
+import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import { Progress } from "@/components/ui/progress";
 
 interface Props {
   onScan: (regNo: string) => void;
@@ -99,40 +101,43 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
 
   return (
     <div className="space-y-4">
-      <div className="bg-white rounded-lg p-4 shadow-sm">
-        <div className="flex items-center justify-between mb-2">
-          <div className="text-2xl font-bold text-gray-900">
-            {minutes}:{seconds.toString().padStart(2, '0')}
+      <Card>
+        <CardContent className="pt-6">
+          <div className="flex items-center justify-between mb-4">
+            <div className="text-2xl font-bold">
+              {minutes}:{seconds.toString().padStart(2, '0')}
+            </div>
+            <div className="text-sm text-muted-foreground bg-secondary px-3 py-1 rounded-full">
+              {duration} min session
+            </div>
           </div>
-          <div className="text-sm font-medium text-gray-600 bg-gray-100 px-3 py-1 rounded-full">
-            {duration} min session
-          </div>
-        </div>
-        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
-          <div 
-            style={{ width: `${timePercentage}%` }}
-            className="h-full bg-blue-600 transition-all duration-500"
-          />
-        </div>
-      </div>
+          <Progress value={timePercentage} />
+        </CardContent>
+      </Card>
 
-      <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-        <div 
-          id="qr-reader" 
-          className={`transition-opacity duration-300 ${isInitialized ? 'opacity-100' : 'opacity-0'}`} 
-        />
-      </div>
+      <Card>
+        <CardContent className="p-0">
+          <div 
+            id="qr-reader" 
+            className={`transition-opacity duration-300 ${isInitialized ? 'opacity-100' : 'opacity-0'}`} 
+          />
+        </CardContent>
+      </Card>
 
       <div className="fixed bottom-0 left-0 right-0 p-4 pointer-events-none">
         <div className="max-w-md mx-auto">
           {lastScanned ? (
-            <div className="bg-green-500 text-white px-4 py-3 rounded-lg shadow-lg text-center animate-fade-out">
-              ✓ Successfully scanned!
-            </div>
+            <Card className="bg-green-500 text-white animate-fade-out border-none">
+              <CardContent className="p-3 text-center">
+                ✓ Successfully scanned!
+              </CardContent>
+            </Card>
           ) : (
-            <div className="bg-white/90 backdrop-blur-sm text-gray-600 px-4 py-3 rounded-lg shadow-lg text-center">
-              Point camera at student's ID QR code
-            </div>
+            <Card className="bg-background/90 backdrop-blur-sm">
+              <CardContent className="p-3 text-center text-muted-foreground">
+                Point camera at student's ID QR code
+              </CardContent>
+            </Card>
           )}
         </div>
       </div>

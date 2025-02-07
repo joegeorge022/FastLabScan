@@ -5,6 +5,8 @@ import { QrScanner } from '@/components/QrScanner';
 import { SetupScreen, SessionConfig } from '@/components/SetupScreen';
 import { useSessions, downloadSession } from '@/hooks/useSessions';
 import { useRouter } from 'next/navigation';
+import { Button } from "@/components/ui/button";
+import { cn } from "@/lib/utils";
 
 interface Student {
   regNo: string;
@@ -16,19 +18,10 @@ interface ActiveSession extends SessionConfig {
 }
 
 const formatRegNo = (regNo: string) => {
-  // First try splitting by '/' for format like "21/CSE/001"
-  const slashParts = regNo.split('/');
-  if (slashParts.length === 3) {
-    return slashParts[2];
-  }
-  
-  // For format like "24CS129", extract last two digits
-  const match = regNo.match(/\d{2}$/);  // Match last two digits
-  if (match) {
-    return match[0];
-  }
-  
-  return regNo;
+  // Split into prefix and number (e.g., "24CS" and "129")
+  const prefix = regNo.slice(0, -3);
+  const number = regNo.slice(-3);
+  return { prefix, number };
 };
 
 export default function Home() {
@@ -46,20 +39,37 @@ export default function Home() {
 
   const handleScan = (regNo: string) => {
     if (!session) return;
-    
+
+    // Check if student already scanned
     if (session.students.some(s => s.regNo === regNo)) {
-      // Could add a "duplicate scan" notification here
       return;
     }
 
-    setSession(prev => ({
-      ...prev!,
-      students: [...prev!.students, {
-        regNo,
-        timestamp: Date.now()
-      }]
-    }));
+    const newStudent: Student = {
+      regNo,
+      timestamp: Date.now()
+    };
+
+    setSession(prev => {
+      if (!prev) return null;
+      return {
+        ...prev,
+        students: [...prev.students, newStudent]
+      };
+    });
   };
+
+  // Calculate number of rows needed based on student count
+  const getGridDimensions = (studentCount: number) => {
+    const baseRows = Math.ceil(60 / 10); // Base 6 rows for 60 students (10 per row)
+    const totalRows = Math.ceil(studentCount / 10); // Actual rows needed
+    return {
+      rows: Math.max(baseRows, totalRows),
+      cols: 10
+    };
+  };
+
+  const dimensions = session ? getGridDimensions(session.students.length) : { rows: 6, cols: 10 };
 
   const handleSessionEnd = () => {
     if (!session) return;
@@ -94,68 +104,43 @@ export default function Home() {
   const renderSeatLayout = () => {
     if (!session) return null;
     
-    // Calculate rows and columns for a roughly square grid
-    const total = session.totalStudents;
-    const cols = Math.ceil(Math.sqrt(total));
-    const rows = Math.ceil(total / cols);
-    const seats = Array(total).fill(null);
-
-    // Fill seats in order of scanning
-    session.students.forEach((student, index) => {
-      if (index < seats.length) {
-        seats[index] = student;
-      }
-    });
-
     return (
-      <div className="p-4">
-        <div className={`grid gap-2 mx-auto`} 
-          style={{ 
-            gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-            maxWidth: `${cols * 3}rem` 
-          }}
-        >
-          {seats.map((student, index) => (
+      <div className="grid gap-2" 
+        style={{ 
+          gridTemplateColumns: `repeat(${dimensions.cols}, minmax(0, 1fr))`,
+          gridTemplateRows: `repeat(${dimensions.rows}, minmax(0, 1fr))`
+        }}>
+        {Array.from({ length: dimensions.rows * dimensions.cols }).map((_, index) => {
+          const student = session?.students[index];
+          return (
             <div
               key={index}
-              className={`aspect-square flex items-center justify-center rounded-lg text-sm font-medium ${
-                student
-                  ? 'bg-green-100 text-green-800'
-                  : 'bg-red-50 text-red-700 border border-red-200'
-              }`}
+              className={cn(
+                "aspect-square rounded-lg p-2 text-center flex flex-col items-center justify-center relative",
+                student 
+                  ? "bg-green-100 text-green-800" 
+                  : "bg-red-50 text-red-700 border border-red-200"
+              )}
+              // Add tooltip with full reg number
+              title={student ? student.regNo : ''}
             >
-              {index + 1}
+              {/* Always show seat number */}
+              <div className={cn(
+                "absolute top-1 left-2 text-xs",
+                student ? "text-green-700" : "text-red-600"
+              )}>
+                {index + 1}
+              </div>
+              
+              {student && (
+                <div className="text-center">
+                  <div className="text-xs font-medium opacity-75">{formatRegNo(student.regNo).prefix}</div>
+                  <div className="text-sm font-bold">{formatRegNo(student.regNo).number}</div>
+                </div>
+              )}
             </div>
-          ))}
-        </div>
-        
-        {/* Legend */}
-        <div className="mt-4 flex justify-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 rounded"></div>
-            <span className="text-green-800">Present</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
-            <span className="text-red-700">Absent</span>
-          </div>
-        </div>
-
-        {/* Progress */}
-        <div className="mt-4 text-center text-sm">
-          <span className="font-medium text-gray-900">
-            {session.students.length}
-          </span>
-          <span className="text-gray-600">
-            {' '}of{' '}
-          </span>
-          <span className="font-medium text-gray-900">
-            {session.totalStudents}
-          </span>
-          <span className="text-gray-600">
-            {' '}students present
-          </span>
-        </div>
+          );
+        })}
       </div>
     );
   };
@@ -165,45 +150,43 @@ export default function Home() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-background">
       {/* Fixed Header */}
-      <div className="fixed top-0 left-0 right-0 bg-white shadow-sm z-10">
+      <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
         <div className="max-w-7xl mx-auto px-4 py-3">
           <div className="flex items-center justify-between">
             <div>
-              <h1 className="text-lg font-bold text-gray-900">
-                {session.department} - Year {session.year}
+              <h1 className="text-lg font-bold">
+                {session?.department} - Year {session?.year}
               </h1>
-              <p className="text-sm text-gray-500">Attendance Session</p>
+              <p className="text-sm text-muted-foreground">Attendance Session</p>
             </div>
             <div className="flex items-center gap-4">
-              <div className="bg-green-50 px-4 py-2 rounded-lg">
-                <div className="text-xs text-green-800 font-medium">Present</div>
-                <div className="text-xl font-bold text-green-900">{session.students.length}</div>
+              <div className="bg-primary/10 px-4 py-2 rounded-lg">
+                <div className="text-xs text-primary font-medium">Present</div>
+                <div className="text-xl font-bold text-primary">{session?.students.length}</div>
               </div>
               
               {/* Desktop Download Button */}
-              <button
+              <Button
                 onClick={handleDownload}
-                className="hidden sm:flex items-center gap-2 px-4 py-2 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
+                variant="outline"
+                className="hidden sm:flex items-center gap-2"
               >
                 <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
                 </svg>
                 Export CSV
-              </button>
+              </Button>
 
               {/* Mobile Toggle Button */}
-              <button 
+              <Button
+                variant="outline"
                 onClick={() => setShowScanner(prev => !prev)}
-                className="lg:hidden bg-blue-50 p-2 rounded-lg"
+                className="lg:hidden"
               >
-                {showScanner ? (
-                  <span className="text-blue-600">View Seats</span>
-                ) : (
-                  <span className="text-blue-600">Scan QR</span>
-                )}
-              </button>
+                {showScanner ? "View Seats" : "Scan QR"}
+              </Button>
             </div>
           </div>
         </div>
@@ -279,6 +262,18 @@ export default function Home() {
               </div>
             </div>
           </div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="mt-4 flex justify-center gap-4 text-sm">
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-green-100 rounded"></div>
+          <span className="text-green-800">Present</span>
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
+          <span className="text-red-700">Absent</span>
         </div>
       </div>
     </div>

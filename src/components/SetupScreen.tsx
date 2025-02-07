@@ -1,12 +1,17 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Button } from "@/components/ui/button";
+import { Label } from "@/components/ui/label";
+
+const STORAGE_KEY = 'last_department_config';
 
 export interface SessionConfig {
   department: string;
   year: number;
   duration: number;
-  totalStudents: number;
 }
 
 interface Props {
@@ -25,139 +30,124 @@ const DURATIONS = [
 
 export function SetupScreen({ onStart }: Props) {
   const [config, setConfig] = useState<SessionConfig>({
-    department: DEPARTMENTS[0],
-    year: YEARS[0],
-    duration: DURATIONS[0].value,
-    totalStudents: 50
+    department: '',
+    year: 1,
+    duration: 10,
   });
 
-  return (
-    <div className="min-h-screen bg-gray-50 flex flex-col justify-center py-12 px-4">
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg">
-        <h1 className="text-center text-4xl font-bold text-gray-900 mb-2">
-          Lab Scanner
-        </h1>
-        <h2 className="text-center text-xl text-gray-600 mb-8">
-          Start New Session
-        </h2>
-      </div>
+  // Load saved config on component mount
+  useEffect(() => {
+    const savedConfig = localStorage.getItem(STORAGE_KEY);
+    if (savedConfig) {
+      try {
+        const parsed = JSON.parse(savedConfig);
+        setConfig(prev => ({
+          ...prev,
+          department: parsed.department || '',
+          year: parsed.year || 1,
+          duration: 10
+        }));
+      } catch (error) {
+        console.error('Error parsing saved config:', error);
+      }
+    }
+  }, []);
 
-      <div className="sm:mx-auto sm:w-full sm:max-w-lg">
-        <div className="bg-white py-8 px-6 shadow-lg rounded-xl">
-          <div className="space-y-8">
+  // Save department and year whenever they change
+  useEffect(() => {
+    if (config.department) {
+      localStorage.setItem(STORAGE_KEY, JSON.stringify({
+        department: config.department,
+        year: config.year
+      }));
+    }
+  }, [config.department, config.year]);
+
+  return (
+    <div className="min-h-screen flex items-center justify-center p-4">
+      <div className="w-full max-w-md space-y-8">
+        <Card>
+          <CardHeader>
+            <CardTitle>Setup Attendance Session</CardTitle>
+            <CardDescription>Configure the session details before starting</CardDescription>
+          </CardHeader>
+          <CardContent className="space-y-4">
             {/* Department Selection */}
-            <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-2">
-                Department
-              </label>
-              <div className="relative">
-                <select
-                  className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
-                  value={config.department}
-                  onChange={(e) => setConfig(prev => ({ ...prev, department: e.target.value }))}
-                >
+            <div className="space-y-2">
+              <Label htmlFor="department">Department</Label>
+              <Select
+                value={config.department}
+                onValueChange={(value: string) => setConfig(prev => ({ ...prev, department: value }))}
+              >
+                <SelectTrigger id="department">
+                  <SelectValue placeholder="Select department" />
+                </SelectTrigger>
+                <SelectContent>
                   {DEPARTMENTS.map(dept => (
-                    <option 
-                      key={dept} 
-                      value={dept} 
-                      className="py-2 text-gray-900 font-medium"
-                    >
+                    <SelectItem key={dept} value={dept}>
                       {dept}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Year Selection */}
-            <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-2">
-                Year
-              </label>
-              <div className="grid grid-cols-4 gap-3">
-                {YEARS.map(year => (
-                  <button
-                    key={year}
-                    type="button"
-                    onClick={() => setConfig(prev => ({ ...prev, year }))}
-                    className={`py-4 text-xl font-medium rounded-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors ${
-                      config.year === year
-                        ? 'bg-blue-600 text-white shadow-md'
-                        : 'bg-gray-100 text-gray-700 hover:bg-gray-200 hover:text-gray-900'
-                    }`}
-                  >
-                    {year}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {/* Student Count Input */}
-            <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-2">
-                Number of Students
-              </label>
-              <input
-                type="number"
-                min="1"
-                max="100"
-                value={config.totalStudents}
-                onChange={(e) => setConfig(prev => ({ 
-                  ...prev, 
-                  totalStudents: Math.max(1, Math.min(100, parseInt(e.target.value) || 1))
-                }))}
-                className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
-              />
+            <div className="space-y-2">
+              <Label htmlFor="year">Year</Label>
+              <Select
+                value={config.year.toString()}
+                onValueChange={(value: string) => setConfig(prev => ({ ...prev, year: parseInt(value) }))}
+              >
+                <SelectTrigger id="year">
+                  <SelectValue placeholder="Select year" />
+                </SelectTrigger>
+                <SelectContent>
+                  {YEARS.map(year => (
+                    <SelectItem key={year} value={year.toString()}>
+                      Year {year}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Duration Selection */}
-            <div>
-              <label className="block text-lg font-semibold text-gray-700 mb-2">
-                Duration
-              </label>
-              <div className="relative">
-                <select
-                  className="appearance-none block w-full px-4 py-4 text-xl font-medium text-gray-900 bg-white border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 hover:border-blue-500"
-                  value={config.duration}
-                  onChange={(e) => setConfig(prev => ({ ...prev, duration: Number(e.target.value) }))}
-                >
+            <div className="space-y-2">
+              <Label htmlFor="duration">Duration</Label>
+              <Select
+                value={config.duration.toString()}
+                onValueChange={(value: string) => setConfig(prev => ({ ...prev, duration: parseInt(value) }))}
+              >
+                <SelectTrigger id="duration">
+                  <SelectValue placeholder="Select duration" />
+                </SelectTrigger>
+                <SelectContent>
                   {DURATIONS.map(({ value, label }) => (
-                    <option 
-                      key={value} 
-                      value={value} 
-                      className="py-2 text-gray-900 font-medium"
-                    >
+                    <SelectItem key={value} value={value.toString()}>
                       {label}
-                    </option>
+                    </SelectItem>
                   ))}
-                </select>
-                <div className="pointer-events-none absolute inset-y-0 right-0 flex items-center px-4 text-blue-600">
-                  <svg className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                  </svg>
-                </div>
-              </div>
+                </SelectContent>
+              </Select>
             </div>
 
             {/* Start Button */}
-            <button
+            <Button 
+              className="w-full"
+              size="lg"
               onClick={() => onStart(config)}
-              className="w-full flex justify-center py-5 px-4 border border-transparent rounded-xl shadow-md text-2xl font-medium text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 transition-colors"
+              disabled={!config.department || !config.year || !config.duration}
             >
               Start Scanning
-            </button>
-          </div>
-        </div>
+            </Button>
+          </CardContent>
+        </Card>
 
         {/* Instructions */}
-        <div className="mt-8 text-center text-gray-600">
-          <p className="text-base">
-            Select department and year, set student count and duration.<br/>
+        <div className="mt-8 text-center text-muted-foreground">
+          <p className="text-sm">
+            Select department and year, set session duration.<br/>
             Students can start scanning their IDs once session begins.
           </p>
         </div>
