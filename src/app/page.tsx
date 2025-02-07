@@ -1,9 +1,9 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { QrScanner } from '@/components/QrScanner';
 import { SetupScreen, SessionConfig } from '@/components/SetupScreen';
-import { useSessions, downloadSession } from '@/hooks/useSessions';
+import { useSessions, downloadSession, downloadExcel, downloadJSON, downloadCSV } from '@/hooks/useSessions';
 import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
@@ -31,6 +31,21 @@ export default function Home() {
   const [session, setSession] = useState<ActiveSession | null>(null);
   const [showScanner, setShowScanner] = useState(true);
   const { showToast } = useToast();
+  const [showExportMenu, setShowExportMenu] = useState(false);
+  const exportMenuRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    function handleClickOutside(event: MouseEvent) {
+      if (exportMenuRef.current && !exportMenuRef.current.contains(event.target as Node)) {
+        setShowExportMenu(false);
+      }
+    }
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, []);
 
   const handleStart = (config: SessionConfig) => {
     setSession({
@@ -79,10 +94,11 @@ export default function Home() {
   const handleSessionEnd = () => {
     if (!session) return;
     
-    // Save session to localStorage
+    // Save session to localStorage with current timestamp
+    const timestamp = Date.now();
     saveSession({
-      id: Date.now().toString(),
-      date: Date.now(),
+      id: timestamp.toString(),
+      date: timestamp,  // Make sure we set the date
       department: session.department,
       year: session.year,
       students: session.students
@@ -173,19 +189,100 @@ export default function Home() {
                   <div className="text-xl font-bold text-primary">{session?.students.length}</div>
                 </div>
                 
-                {/* Only Export and Toggle buttons remain in header */}
+                {/* Export and Toggle buttons */}
                 <div className="flex items-center gap-2">
+                  {/* Mobile View Toggle */}
                   <Button
-                    onClick={handleDownload}
                     variant="outline"
-                    className="hidden sm:flex items-center gap-2"
+                    size="icon"
+                    className="lg:hidden"
+                    onClick={() => setShowScanner(!showScanner)}
                   >
-                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                    </svg>
-                    Export CSV
+                    {showScanner ? (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                      </svg>
+                    ) : (
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" />
+                      </svg>
+                    )}
                   </Button>
 
+                  {/* Export Button Container */}
+                  <div className="relative">
+                    {/* Desktop Export Button */}
+                    <Button
+                      variant="outline"
+                      className="items-center gap-2 hidden sm:flex"
+                      onClick={() => setShowExportMenu(!showExportMenu)}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                      <span>Export</span>
+                    </Button>
+
+                    {/* Mobile Export Button */}
+                    <Button
+                      variant="outline"
+                      size="icon"
+                      className="sm:hidden"
+                      onClick={() => setShowExportMenu(!showExportMenu)}
+                    >
+                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
+                      </svg>
+                    </Button>
+
+                    {/* Export Menu - Shared between mobile and desktop */}
+                    <div 
+                      ref={exportMenuRef}
+                      className={cn(
+                        "absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 transition-all",
+                        showExportMenu ? "opacity-100 visible" : "opacity-0 invisible"
+                      )}
+                    >
+                      <div className="py-1">
+                        <button
+                          onClick={() => {
+                            downloadExcel(session);
+                            setShowExportMenu(false);
+                          }}
+                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <svg className="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                          </svg>
+                          Export as Excel
+                        </button>
+                        <button
+                          onClick={() => {
+                            downloadJSON(session);
+                            setShowExportMenu(false);
+                          }}
+                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <svg className="w-4 h-4 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
+                          </svg>
+                          Export as JSON
+                        </button>
+                        <button
+                          onClick={() => {
+                            downloadCSV(session);
+                            setShowExportMenu(false);
+                          }}
+                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                        >
+                          <svg className="w-4 h-4 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                          </svg>
+                          Export as CSV
+                        </button>
+                      </div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -219,16 +316,6 @@ export default function Home() {
                 <div className="bg-white rounded-lg shadow-sm overflow-hidden">
                   <div className="p-4 border-b flex justify-between items-center">
                     <h2 className="text-lg font-semibold text-gray-900">Attendance Overview</h2>
-                    {/* Mobile Download Button */}
-                    <button
-                      onClick={handleDownload}
-                      className="sm:hidden flex items-center gap-2 px-3 py-1.5 text-sm font-medium text-blue-600 bg-blue-50 rounded-lg hover:bg-blue-100"
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      Export
-                    </button>
                   </div>
                   
                   {/* Seat Layout */}
