@@ -5,6 +5,19 @@ import type { AttendanceSession } from '@/types';
 
 const STORAGE_KEY = 'attendance_sessions';
 
+// Fix the formatDate helper function
+const formatDate = (timestamp: number) => {
+  let date = new Date(timestamp); // Change const to let
+  if (isNaN(date.getTime())) {
+    // If invalid date, use current date
+    date = new Date();
+  }
+  const dd = String(date.getDate()).padStart(2, '0');
+  const mm = String(date.getMonth() + 1).padStart(2, '0');
+  const yyyy = date.getFullYear();
+  return `${dd}-${mm}-${yyyy}`;
+};
+
 export const downloadSession = (session: AttendanceSession) => {
   const formatDate = (date: Date) => {
     const day = date.getDate().toString().padStart(2, '0');
@@ -80,7 +93,8 @@ export const downloadExcel = (session: AttendanceSession) => {
   const blob = new Blob([csvContent], { 
     type: 'application/vnd.ms-excel;charset=utf-8'
   });
-  downloadFile(blob, `attendance_${formatFileName(session.date)}.xls`);
+  const filename = `${formatDate(session.date)}-${session.department}.xlsx`;
+  downloadFile(blob, filename);
 };
 
 export const downloadJSON = (session: AttendanceSession) => {
@@ -113,7 +127,8 @@ export const downloadJSON = (session: AttendanceSession) => {
   const blob = new Blob([JSON.stringify(data, null, 2)], { 
     type: 'application/json;charset=utf-8'
   });
-  downloadFile(blob, `attendance_${formatFileName(session.date)}.json`);
+  const filename = `${formatDate(session.date)}-${session.department}.json`;
+  downloadFile(blob, filename);
 };
 
 export const downloadCSV = (session: AttendanceSession) => {
@@ -133,20 +148,11 @@ export const downloadCSV = (session: AttendanceSession) => {
   ).join('\n');
 
   const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
-  downloadFile(blob, `attendance_${formatFileName(session.date)}.csv`);
+  const filename = `${formatDate(session.date)}-${session.department}.csv`;
+  downloadFile(blob, filename);
 };
 
 // Helper functions
-const formatFileName = (timestamp: number) => {
-  // If timestamp is invalid, use current time
-  const validTimestamp = isNaN(timestamp) ? Date.now() : timestamp;
-  const date = new Date(validTimestamp);
-  const day = date.getDate().toString().padStart(2, '0');
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const year = date.getFullYear();
-  return `${day}-${month}-${year}`;
-};
-
 const downloadFile = (blob: Blob, filename: string) => {
   const url = window.URL.createObjectURL(blob);
   const a = document.createElement('a');

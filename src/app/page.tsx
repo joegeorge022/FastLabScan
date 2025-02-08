@@ -9,6 +9,7 @@ import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
+import { Download, FileSpreadsheet, FileJson, FileText } from "lucide-react";
 
 interface Student {
   regNo: string;
@@ -240,50 +241,29 @@ export default function Home() {
 
                   {/* Export Button Container */}
                   <div className="relative">
-                    {/* Desktop Export Button */}
-                    <Button
-                      variant="outline"
-                      className="items-center gap-2 hidden sm:flex"
-                      onClick={() => setShowExportMenu(!showExportMenu)}
-                    >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
-                      <span>Export</span>
-                    </Button>
-
-                    {/* Mobile Export Button */}
                     <Button
                       variant="outline"
                       size="icon"
-                      className="sm:hidden"
                       onClick={() => setShowExportMenu(!showExportMenu)}
+                      className="h-8 w-8 transition-all duration-200 active:scale-95"
                     >
-                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
-                      </svg>
+                      <Download className="h-4 w-4 transition-transform duration-200" />
                     </Button>
 
-                    {/* Export Menu - Shared between mobile and desktop */}
-                    <div 
-                      ref={exportMenuRef}
-                      className={cn(
-                        "absolute right-0 mt-2 w-48 bg-white rounded-md shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none z-50 transition-all",
-                        showExportMenu ? "opacity-100 visible" : "opacity-0 invisible"
-                      )}
-                    >
-                      <div className="py-1">
+                    {/* Export Menu */}
+                    {showExportMenu && (
+                      <div
+                        ref={exportMenuRef}
+                        className="absolute right-0 top-full mt-2 w-48 rounded-md border bg-popover p-1 text-popover-foreground shadow-md animate-in fade-in-0 zoom-in-95"
+                      >
                         <button
                           onClick={() => {
-                            // @ts-ignore
                             downloadExcel(session);
                             setShowExportMenu(false);
                           }}
-                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
                         >
-                          <svg className="w-4 h-4 mr-3 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 17v-2m3 2v-4m3 4v-6m2 10H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
+                          <FileSpreadsheet className="mr-2 h-4 w-4 text-green-600" />
                           Export as Excel
                         </button>
                         <button
@@ -291,11 +271,9 @@ export default function Home() {
                             downloadJSON(session);
                             setShowExportMenu(false);
                           }}
-                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
                         >
-                          <svg className="w-4 h-4 mr-3 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 10h16M4 14h16M4 18h16" />
-                          </svg>
+                          <FileJson className="mr-2 h-4 w-4 text-blue-600" />
                           Export as JSON
                         </button>
                         <button
@@ -303,15 +281,13 @@ export default function Home() {
                             downloadCSV(session);
                             setShowExportMenu(false);
                           }}
-                          className="group flex items-center w-full px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
                         >
-                          <svg className="w-4 h-4 mr-3 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
-                          </svg>
+                          <FileText className="mr-2 h-4 w-4 text-orange-600" />
                           Export as CSV
                         </button>
                       </div>
-                    </div>
+                    )}
                   </div>
                 </div>
               </div>
@@ -324,35 +300,34 @@ export default function Home() {
 
         {/* Main Content Wrapper */}
         <main className="flex-1 w-full">
-          <div className="w-full px-2 sm:container sm:mx-auto sm:px-4 py-4 pb-24">
-            <div className="grid lg:grid-cols-2 gap-3 sm:gap-4">
+          <div className="w-full h-full px-2 sm:container sm:mx-auto sm:px-4 py-4 pb-24">
+            <div className="grid lg:grid-cols-2 gap-3 sm:gap-4 h-full">
               {/* Scanner Section */}
-              <div className={`transition-all duration-300 ${
-                showScanner ? 'block' : 'hidden lg:block'
-              }`}>
-                <Card className="h-full">
-                  <CardHeader className="py-2 sm:py-3 border-b">
-                    <CardTitle>Scanner</CardTitle>
-                  </CardHeader>
-                  <CardContent className="p-0">
-                    <QrScanner 
-                      onScan={handleScan}
-                      duration={session.duration}
-                      onSessionEnd={handleSessionEnd}
-                    />
-                  </CardContent>
-                </Card>
+              <div className={cn(
+                "transition-all duration-300 h-full",
+                showScanner 
+                  ? 'block lg:col-span-1' 
+                  : 'hidden lg:block lg:col-span-2'
+              )}>
+                <QrScanner
+                  onScan={handleScan}
+                  duration={session.duration}
+                  onSessionEnd={handleSessionEnd}
+                />
               </div>
 
               {/* Attendance Overview Section */}
-              <div className={`transition-all duration-300 ${
-                !showScanner ? 'block' : 'hidden lg:block'
-              }`}>
-                <Card className="h-full flex flex-col">
+              <div className={cn(
+                "transition-all duration-300 h-full",
+                showScanner
+                  ? 'hidden lg:block lg:col-span-1'
+                  : 'block lg:col-span-2'
+              )}>
+                <Card className="h-full">
                   <CardHeader className="py-2 sm:py-3 border-b">
                     <CardTitle>Attendance Overview</CardTitle>
                   </CardHeader>
-                  <CardContent className="flex-1 overflow-auto p-2 sm:p-4">
+                  <CardContent className="h-[calc(100%-3rem)] overflow-auto p-2 sm:p-4">
                     {renderSeatLayout()}
                   </CardContent>
                 </Card>

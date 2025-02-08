@@ -8,8 +8,23 @@ import { Label } from "@/components/ui/label";
 
 const STORAGE_KEY = 'last_department_config';
 
+const DEPARTMENTS = [
+  { value: 'CSE-A', label: 'CSE-A' },
+  { value: 'CSE-B', label: 'CSE-B' },
+  { value: 'CSE-C', label: 'CSE-C' },
+  { value: 'AD', label: 'AD' },
+  { value: 'AI', label: 'AI' },
+  { value: 'EEE', label: 'EEE' },
+  { value: 'ME', label: 'ME' },
+  { value: 'CE', label: 'CE' },
+  { value: 'ECE', label: 'ECE' },
+  { value: 'ECS', label: 'ECS' },
+] as const;
+
+export type Department = typeof DEPARTMENTS[number]['value'];
+
 export interface SessionConfig {
-  department: string;
+  department: Department;
   year: number;
   duration: number;
 }
@@ -18,7 +33,6 @@ interface Props {
   onStart: (config: SessionConfig) => void;
 }
 
-const DEPARTMENTS = ['AD', 'CSE', 'EEE', 'ECE', 'ME', 'CE'];
 const YEARS = [1, 2, 3, 4];
 const DURATIONS = [
   { value: 10, label: '10 minutes' },
@@ -30,7 +44,7 @@ const DURATIONS = [
 
 export function SetupScreen({ onStart }: Props) {
   const [config, setConfig] = useState<SessionConfig>({
-    department: '',
+    department: 'AD',
     year: 1,
     duration: 10,
   });
@@ -43,7 +57,7 @@ export function SetupScreen({ onStart }: Props) {
         const parsed = JSON.parse(savedConfig);
         setConfig(prev => ({
           ...prev,
-          department: parsed.department || '',
+          department: parsed.department || 'AD',
           year: parsed.year || 1,
           duration: 10
         }));
@@ -77,15 +91,15 @@ export function SetupScreen({ onStart }: Props) {
               <Label htmlFor="department">Department</Label>
               <Select
                 value={config.department}
-                onValueChange={(value: string) => setConfig(prev => ({ ...prev, department: value }))}
+                onValueChange={(value: Department) => setConfig(prev => ({ ...prev, department: value }))}
               >
                 <SelectTrigger id="department">
                   <SelectValue placeholder="Select department" />
                 </SelectTrigger>
                 <SelectContent>
-                  {DEPARTMENTS.map(dept => (
-                    <SelectItem key={dept} value={dept}>
-                      {dept}
+                  {DEPARTMENTS.map(({ value, label }) => (
+                    <SelectItem key={value} value={value}>
+                      {label}
                     </SelectItem>
                   ))}
                 </SelectContent>

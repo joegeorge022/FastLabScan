@@ -179,3 +179,46 @@ body {
   margin: 0 !important;
   padding: 0 !important;
 }
+
+/* Add these styles for the manual input section */
+@media (max-width: 640px) {
+  .manual-input-section {
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 20;
+  }
+}
+
+/* Improve input appearance on mobile */
+input[type="text"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0.5rem;
+}
+
+/* Add touch feedback for mobile */
+@media (hover: none) {
+  .touch-feedback:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Add these styles for the PIN input */
+input[type="password"][inputmode="numeric"] {
+  letter-spacing: 0.5em;
+  font-family: monospace;
+}
+
+/* Hide password reveal button in modern browsers */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  .pin-button {
+    min-height: 44px;
+  }
+}
