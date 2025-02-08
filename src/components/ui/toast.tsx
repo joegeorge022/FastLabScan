@@ -28,16 +28,19 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* Toast Component */}
+      {/* Updated Toast Component */}
       <div
         className={cn(
-          "fixed bottom-24 left-1/2 -translate-x-1/2 transform transition-all duration-300",
+          "fixed left-1/2 -translate-x-1/2 transform transition-all duration-300",
+          // Adjust bottom position and z-index
+          "bottom-[5.5rem] sm:bottom-24 z-[100]",
+          // Improved visibility and animation
           toast.isVisible
             ? "opacity-100 translate-y-0"
-            : "opacity-0 translate-y-2"
+            : "opacity-0 translate-y-2 pointer-events-none"
         )}
       >
-        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md shadow-lg border border-green-200 text-sm font-medium">
+        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md shadow-lg border border-green-200 text-sm font-medium min-w-[200px] text-center">
           {toast.message}
         </div>
       </div>

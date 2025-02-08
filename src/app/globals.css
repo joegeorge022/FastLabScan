@@ -61,12 +61,22 @@ body {
   background: white;
   border-radius: 0.5rem;
   overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }
 
 #qr-reader__scan_region {
-  min-height: 300px;
+  flex: 1;
+  min-height: 350px !important;
   background: black;
   position: relative;
+}
+
+#qr-reader__scan_region video {
+  object-fit: cover !important;
+  min-height: 350px !important;
+  margin-bottom: 0 !important;
 }
 
 #qr-reader__scan_region::after {
@@ -142,4 +152,30 @@ body {
 
 .animate-fade-out {
   animation: fadeOut 2s ease-out forwards;
+}
+
+/* Add new utility class for safe area margin */
+.mb-safe {
+  margin-bottom: calc(env(safe-area-inset-bottom) + 5rem) !important;
+}
+
+/* Update the container styles */
+.space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 5rem;
+}
+
+/* Ensure the end session button doesn't overlap */
+.fixed.bottom-0 {
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 50;
+}
+
+/* Add styles to handle the QR reader container */
+#qr-reader__dashboard_section,
+#qr-reader__dashboard_section_csr {
+  margin: 0 !important;
+  padding: 0 !important;
 }

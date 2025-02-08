@@ -8,6 +8,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 import { useToast } from "@/components/ui/toast";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 
 interface Student {
   regNo: string;
@@ -81,11 +82,15 @@ export default function Home() {
 
   // Calculate number of rows needed based on student count
   const getGridDimensions = (studentCount: number) => {
-    const baseRows = Math.ceil(60 / 10); // Base 6 rows for 60 students (10 per row)
-    const totalRows = Math.ceil(studentCount / 10); // Actual rows needed
+    // Use different column counts for mobile and desktop
+    const isMobile = window.innerWidth < 1024; // lg breakpoint
+    const colsPerRow = isMobile ? 7 : 10;
+    const baseRows = 6;
+    const totalRows = Math.ceil(studentCount / colsPerRow);
+    
     return {
       rows: Math.max(baseRows, totalRows),
-      cols: 10
+      cols: colsPerRow
     };
   };
 
@@ -108,6 +113,7 @@ export default function Home() {
     router.push('/history');
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
   const handleDownload = () => {
     if (!session) return;
     
@@ -122,11 +128,24 @@ export default function Home() {
     downloadSession(sessionData);
   };
 
+  // Add window resize handler
+  useEffect(() => {
+    const handleResize = () => {
+      // Force re-render when window is resized
+      setSession(prev => prev ? {...prev} : null);
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   const renderSeatLayout = () => {
     if (!session) return null;
     
+    const isMobile = window.innerWidth < 1024;
+    
     return (
-      <div className="grid gap-2" 
+      <div className="grid gap-1 sm:gap-1.5" 
         style={{ 
           gridTemplateColumns: `repeat(${dimensions.cols}, minmax(0, 1fr))`,
           gridTemplateRows: `repeat(${dimensions.rows}, minmax(0, 1fr))`
@@ -137,26 +156,36 @@ export default function Home() {
             <div
               key={index}
               className={cn(
-                "aspect-square rounded-lg p-2 text-center flex flex-col items-center justify-center relative",
+                "aspect-square rounded-md text-center flex flex-col items-center justify-center relative",
+                "transition-colors duration-200 active:scale-95 touch-manipulation",
                 student 
-                  ? "bg-green-100 text-green-800" 
-                  : "bg-red-50 text-red-700 border border-red-200"
+                  ? "bg-green-100 text-green-800 border border-green-200" 
+                  : "bg-red-100 text-red-900 border-2 border-red-200"
               )}
-              // Add tooltip with full reg number
               title={student ? student.regNo : ''}
             >
-              {/* Always show seat number */}
               <div className={cn(
-                "absolute top-1 left-2 text-xs",
-                student ? "text-green-700" : "text-red-600"
+                "absolute top-0.5 left-1 font-medium",
+                isMobile ? "text-[10px]" : "text-sm",
+                student ? "text-green-700" : "text-red-700"
               )}>
                 {index + 1}
               </div>
               
               {student && (
-                <div className="text-center">
-                  <div className="text-xs font-medium opacity-75">{formatRegNo(student.regNo).prefix}</div>
-                  <div className="text-sm font-bold">{formatRegNo(student.regNo).number}</div>
+                <div className="text-center mt-1">
+                  <div className={cn(
+                    "font-medium opacity-75",
+                    isMobile ? "text-[9px]" : "text-xs"
+                  )}>
+                    {formatRegNo(student.regNo).prefix}
+                  </div>
+                  <div className={cn(
+                    "font-bold",
+                    isMobile ? "text-[11px]" : "text-sm"
+                  )}>
+                    {formatRegNo(student.regNo).number}
+                  </div>
                 </div>
               )}
             </div>
@@ -172,13 +201,13 @@ export default function Home() {
 
   return (
     <>
-      <div className="min-h-screen bg-background">
-        {/* Fixed Header */}
-        <div className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-10 border-b">
-          <div className="max-w-7xl mx-auto px-4 py-3">
-            <div className="flex items-center justify-between">
+      <div className="min-h-screen bg-background flex flex-col">
+        {/* Fixed Header with explicit height */}
+        <header className="fixed top-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 z-50 border-b safe-area-top h-[4rem] sm:h-[4.5rem]">
+          <div className="w-full h-full px-2 sm:container sm:mx-auto sm:px-4 flex items-center">
+            <div className="flex-1 flex items-center justify-between">
               <div>
-                <h1 className="text-lg font-bold">
+                <h1 className="text-xl font-bold">
                   {session?.department} - Year {session?.year}
                 </h1>
                 <p className="text-sm text-muted-foreground">Attendance Session</p>
@@ -246,6 +275,7 @@ export default function Home() {
                       <div className="py-1">
                         <button
                           onClick={() => {
+                            // @ts-ignore
                             downloadExcel(session);
                             setShowExportMenu(false);
                           }}
@@ -287,104 +317,68 @@ export default function Home() {
               </div>
             </div>
           </div>
-        </div>
+        </header>
 
-        {/* Main Content */}
-        <div className="pt-20 pb-16 px-4">
-          <div className="max-w-7xl mx-auto">
-            <div className="lg:grid lg:grid-cols-2 lg:gap-6">
+        {/* Static spacer div with matching height */}
+        <div className="w-full h-[4rem] sm:h-[4.5rem] flex-none" aria-hidden="true" />
+
+        {/* Main Content Wrapper */}
+        <main className="flex-1 w-full">
+          <div className="w-full px-2 sm:container sm:mx-auto sm:px-4 py-4 pb-24">
+            <div className="grid lg:grid-cols-2 gap-3 sm:gap-4">
               {/* Scanner Section */}
               <div className={`transition-all duration-300 ${
                 showScanner ? 'block' : 'hidden lg:block'
               }`}>
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <div className="p-4 border-b">
-                    <h2 className="text-lg font-semibold text-gray-900">Scanner</h2>
-                  </div>
-                  <QrScanner 
-                    onScan={handleScan}
-                    duration={session.duration}
-                    onSessionEnd={handleSessionEnd}
-                  />
-                </div>
+                <Card className="h-full">
+                  <CardHeader className="py-2 sm:py-3 border-b">
+                    <CardTitle>Scanner</CardTitle>
+                  </CardHeader>
+                  <CardContent className="p-0">
+                    <QrScanner 
+                      onScan={handleScan}
+                      duration={session.duration}
+                      onSessionEnd={handleSessionEnd}
+                    />
+                  </CardContent>
+                </Card>
               </div>
 
               {/* Attendance Overview Section */}
               <div className={`transition-all duration-300 ${
                 !showScanner ? 'block' : 'hidden lg:block'
               }`}>
-                <div className="bg-white rounded-lg shadow-sm overflow-hidden">
-                  <div className="p-4 border-b flex justify-between items-center">
-                    <h2 className="text-lg font-semibold text-gray-900">Attendance Overview</h2>
-                  </div>
-                  
-                  {/* Seat Layout */}
-                  {renderSeatLayout()}
-
-                  {/* Recent Scans List */}
-                  <div className="border-t">
-                    <div className="p-4 border-b">
-                      <h3 className="text-sm font-medium text-gray-700">Recent Scans</h3>
-                    </div>
-                    <div className="max-h-[300px] overflow-y-auto divide-y divide-gray-100">
-                      {session.students.length === 0 ? (
-                        <div className="px-4 py-8 text-center text-gray-500">
-                          No students scanned yet
-                        </div>
-                      ) : (
-                        session.students.map((student) => (
-                          <div 
-                            key={student.regNo}
-                            className="px-4 py-2 flex justify-between items-center hover:bg-gray-50"
-                          >
-                            <div className="font-medium text-gray-900">{student.regNo}</div>
-                            <div className="text-sm text-gray-500">
-                              {new Date(student.timestamp).toLocaleTimeString()}
-                            </div>
-                          </div>
-                        )).reverse()
-                      )}
-                    </div>
-                  </div>
-                </div>
+                <Card className="h-full flex flex-col">
+                  <CardHeader className="py-2 sm:py-3 border-b">
+                    <CardTitle>Attendance Overview</CardTitle>
+                  </CardHeader>
+                  <CardContent className="flex-1 overflow-auto p-2 sm:p-4">
+                    {renderSeatLayout()}
+                  </CardContent>
+                </Card>
               </div>
             </div>
           </div>
-        </div>
+        </main>
 
-        {/* Legend */}
-        <div className="mt-4 flex justify-center gap-4 text-sm">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-green-100 rounded"></div>
-            <span className="text-green-800">Present</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 bg-red-50 border border-red-200 rounded"></div>
-            <span className="text-red-700">Absent</span>
-          </div>
-        </div>
-
-        {/* New Fixed Bottom Bar */}
-        <div className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t">
-          <div className="max-w-7xl mx-auto px-4 py-4">
-            <div className="flex justify-center">
+        {/* Fixed Bottom Bar */}
+        <footer className="fixed bottom-0 left-0 right-0 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-t safe-area-bottom z-50 h-[4rem]">
+          <div className="w-full h-full px-2 sm:container sm:mx-auto sm:px-4 flex items-center">
+            <div className="w-full flex justify-center">
               <Button
                 onClick={handleSessionEnd}
                 variant="destructive"
                 size="lg"
-                className="w-full max-w-sm flex items-center justify-center gap-2"
+                className="w-full max-w-sm active:scale-95 transition-transform"
               >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                </svg>
                 End Session
               </Button>
             </div>
           </div>
-        </div>
+        </footer>
 
-        {/* Add padding to prevent content from being hidden behind the bottom bar */}
-        <div className="h-20"></div>
+        {/* Bottom spacer */}
+        <div className="w-full h-[4rem] flex-none" aria-hidden="true" />
       </div>
     </>
   );
