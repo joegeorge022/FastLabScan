@@ -10,16 +10,41 @@ import { Input } from "@/components/ui/input";
 import { PinDialog } from "@/components/ui/pin-dialog";
 import { Lock, LockKeyhole } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { useToast } from "@/components/ui/toast";
+
+interface ParsedRegNo {
+  year: string;
+  department: string;
+  rollNo: string;
+  isValid: boolean;
+}
+
+const parseRegNo = (regNo: string): ParsedRegNo => {
+  const match = regNo.match(/^(\d{2})((?:CS|AD|AI|EE|ME|CE|EC|ECS))(\d{3})$/);
+  
+  if (!match) {
+    return { year: '', department: '', rollNo: '', isValid: false };
+  }
+
+  return {
+    year: match[1],
+    department: match[2],
+    rollNo: match[3],
+    isValid: true
+  };
+};
 
 interface Props {
   onScan: (regNo: string) => void;
   duration: number;
   onSessionEnd: () => void;
+  currentDepartment: string;
 }
 
 const CAMERA_STORAGE_KEY = 'preferred_camera';
 
-export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactElement {
+export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }: Props): ReactElement {
+  const { showToast } = useToast();
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
@@ -31,6 +56,59 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [pinDialogMode, setPinDialogMode] = useState<'set' | 'verify'>('verify');
   const [sessionPin, setSessionPin] = useState<string | null>(null);
+  const [isProcessingScan, setIsProcessingScan] = useState(false);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+
+  useEffect(() => {
+    audioRef.current = new Audio('/sounds/beep.mp3');
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
+
+  const handleScan = useCallback(async (decodedText: string) => {
+    if (isProcessingScan || decodedText === lastScanned) return;
+    
+    try {
+      setIsProcessingScan(true);
+      const parsed = parseRegNo(decodedText);
+      
+      if (!parsed.isValid) {
+        showToast('Invalid registration number format', 'error');
+        return;
+      }
+
+      if (parsed.department !== currentDepartment) {
+        showToast(`Wrong department: ${parsed.department}`, 'error');
+        return;
+      }
+
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100);
+      }
+
+      if (audioRef.current) {
+        try {
+          await audioRef.current.play();
+        } catch (error) {
+          console.debug('Audio play error:', error);
+        }
+      }
+
+      setLastScanned(decodedText);
+      onScan(decodedText);
+      showToast(`Scanned: ${decodedText}`, 'success');
+
+    } finally {
+      setTimeout(() => {
+        setIsProcessingScan(false);
+        setLastScanned(null);
+      }, 2000);
+    }
+  }, [currentDepartment, isProcessingScan, lastScanned, onScan, showToast]);
 
   const initializeScanner = useCallback(async () => {
     try {
@@ -63,46 +141,14 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
 
       if (permissionStatus.state === 'granted') {
         scanner.render(
-          (decodedText: string) => {
-            if (decodedText === lastScanned) return;
-
-            if ('vibrate' in navigator) {
-              navigator.vibrate(100);
-            }
-
-            const audio = new Audio('/sounds/beep.mp3');
-            audio.play().catch(() => {});
-
-            setLastScanned(decodedText);
-            onScan(decodedText);
-
-            setTimeout(() => {
-              setLastScanned(null);
-            }, 2000);
-          },
+          handleScan,
           (error: unknown) => {
             console.debug('QR Scanner error:', error);
           }
         );
       } else {
         scanner.render(
-          (decodedText: string) => {
-            if (decodedText === lastScanned) return;
-
-            if ('vibrate' in navigator) {
-              navigator.vibrate(100);
-            }
-
-            const audio = new Audio('/sounds/beep.mp3');
-            audio.play().catch(() => {});
-
-            setLastScanned(decodedText);
-            onScan(decodedText);
-
-            setTimeout(() => {
-              setLastScanned(null);
-            }, 2000);
-          },
+          handleScan,
           (error: unknown) => {
             console.debug('QR Scanner error:', error);
           }
@@ -117,7 +163,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
     } catch (error) {
       console.error('Failed to initialize scanner:', error);
     }
-  }, [currentCamera, lastScanned, onScan]);
+  }, [currentCamera, lastScanned, onScan, currentDepartment]);
 
   const switchCamera = async () => {
     if (!html5QrCodeRef.current) return;
@@ -148,17 +194,24 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
     }
   };
 
-  useEffect(() => {
-    initializeScanner();
-
-    return () => {
+  const cleanupScanner = useCallback(async () => {
+    try {
       if (scannerRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
-        scannerRef.current.clear();
+        await scannerRef.current.clear();
       }
       scannerRef.current = null;
       html5QrCodeRef.current = null;
+    } catch (error) {
+      console.debug('Scanner cleanup error:', error);
+    }
+  }, []);
+
+  useEffect(() => {
+    initializeScanner();
+    return () => {
+      cleanupScanner();
     };
-  }, [onScan, lastScanned, initializeScanner]);
+  }, [initializeScanner, cleanupScanner]);
 
   useEffect(() => {
     const timer = setInterval(() => {

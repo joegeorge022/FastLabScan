@@ -238,3 +238,11 @@ input[type="password"]::-ms-clear {
 #html5-qrcode-anchor-scan-type-change {
   display: none !important;
 }
+
+select#html5-qrcode-select-camera {
+  display: none !important;
+}
+
+#html5-qrcode-select-camera-container {
+  display: none !important;
+}

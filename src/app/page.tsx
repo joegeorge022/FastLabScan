@@ -332,6 +332,7 @@ export default function Home() {
                   onScan={handleScan}
                   duration={session.duration}
                   onSessionEnd={handleSessionEnd}
+                  currentDepartment={session.department}
                 />
               </div>
 

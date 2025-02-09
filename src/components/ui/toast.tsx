@@ -6,20 +6,22 @@ import { cn } from "@/lib/utils"
 interface ToastProps {
   message: string;
   isVisible: boolean;
+  variant?: 'success' | 'error';
 }
 
 const ToastContext = React.createContext<{
-  showToast: (message: string) => void;
+  showToast: (message: string, variant?: 'success' | 'error') => void;
 } | null>(null);
 
 export function ToastProvider({ children }: { children: React.ReactNode }) {
   const [toast, setToast] = React.useState<ToastProps>({
     message: '',
     isVisible: false,
+    variant: 'success'
   });
 
-  const showToast = React.useCallback((message: string) => {
-    setToast({ message, isVisible: true });
+  const showToast = React.useCallback((message: string, variant: 'success' | 'error' = 'success') => {
+    setToast({ message, isVisible: true, variant });
     setTimeout(() => {
       setToast(prev => ({ ...prev, isVisible: false }));
     }, 2000);
@@ -28,19 +30,20 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
   return (
     <ToastContext.Provider value={{ showToast }}>
       {children}
-      {/* Updated Toast Component */}
       <div
         className={cn(
           "fixed left-1/2 -translate-x-1/2 transform transition-all duration-300",
-          // Adjust bottom position and z-index
           "bottom-[5.5rem] sm:bottom-24 z-[100]",
-          // Improved visibility and animation
           toast.isVisible
             ? "opacity-100 translate-y-0"
             : "opacity-0 translate-y-2 pointer-events-none"
         )}
       >
-        <div className="bg-green-100 text-green-800 px-4 py-2 rounded-md shadow-lg border border-green-200 text-sm font-medium min-w-[200px] text-center">
+        <div className={cn(
+          "px-4 py-2 rounded-md shadow-lg border text-sm font-medium min-w-[200px] text-center",
+          toast.variant === 'success' && "bg-green-100 text-green-800 border-green-200",
+          toast.variant === 'error' && "bg-red-100 text-red-800 border-red-200"
+        )}>
           {toast.message}
         </div>
       </div>

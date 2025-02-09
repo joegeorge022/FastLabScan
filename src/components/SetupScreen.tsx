@@ -12,10 +12,10 @@ const DEPARTMENTS = [
   { value: 'CS', label: 'CS' },
   { value: 'AD', label: 'AD' },
   { value: 'AI', label: 'AI' },
-  { value: 'EEE', label: 'EEE' },
+  { value: 'EE', label: 'EE' },
   { value: 'ME', label: 'ME' },
   { value: 'CE', label: 'CE' },
-  { value: 'ECE', label: 'ECE' },
+  { value: 'EC', label: 'EC' },
   { value: 'ECS', label: 'ECS' },
 ] as const;
 
