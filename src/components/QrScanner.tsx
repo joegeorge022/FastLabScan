@@ -106,6 +106,13 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
   const handleManualSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (manualRegNo.trim()) {
+      if ('vibrate' in navigator) {
+        navigator.vibrate(100);
+      }
+
+      const audio = new Audio('/sounds/beep.mp3');
+      audio.play().catch(() => {});
+
       onScan(manualRegNo.trim().toUpperCase());
       setManualRegNo('');
     }

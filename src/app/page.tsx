@@ -21,7 +21,6 @@ interface ActiveSession extends SessionConfig {
 }
 
 const formatRegNo = (regNo: string) => {
-  // Split into prefix and number (e.g., "24CS" and "129")
   const prefix = regNo.slice(0, -3);
   const number = regNo.slice(-3);
   return { prefix, number };
@@ -77,7 +76,7 @@ export default function Home() {
       };
     });
 
-    // Show toast
+    // Show toast. i.e the 'succesfully scanned' component
     showToast(`✓ Scanned: ${regNo}`);
   };
 
