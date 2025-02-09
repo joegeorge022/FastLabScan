@@ -222,3 +222,19 @@ input[type="password"]::-ms-clear {
     min-height: 44px;
   }
 }
+
+/* Add these styles to hide the file scan option */
+#qr-reader__filescan_input,
+#qr-reader a {
+  display: none !important;
+}
+
+/* Hide any elements with text containing "Scan an Image File" */
+#qr-reader *:contains('Scan an Image File') {
+  display: none !important;
+}
+
+/* Hide specifically the "Scan an Image File" link */
+#html5-qrcode-anchor-scan-type-change {
+  display: none !important;
+}

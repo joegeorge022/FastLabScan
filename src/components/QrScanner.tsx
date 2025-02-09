@@ -1,6 +1,6 @@
 'use client';
 
-import { Html5QrcodeScanner, Html5QrcodeScannerState, Html5Qrcode } from "html5-qrcode";
+import { Html5QrcodeScanner, Html5QrcodeScannerState, Html5Qrcode, Html5QrcodeSupportedFormats } from "html5-qrcode";
 import { useEffect, useState, useRef, useCallback } from "react";
 import type { ReactElement } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
@@ -34,6 +34,8 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
 
   const initializeScanner = useCallback(async () => {
     try {
+      const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
+      
       const preferredCamera = localStorage.getItem(CAMERA_STORAGE_KEY);
       
       const scanner = new Html5QrcodeScanner("qr-reader", {
@@ -49,34 +51,68 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
           facingMode: preferredCamera || currentCamera,
           width: { min: 640, ideal: 1280, max: 1920 },
           height: { min: 480, ideal: 720, max: 1080 },
-        }
+        },
+        formatsToSupport: permissionStatus.state === 'granted' ? undefined : [Html5QrcodeSupportedFormats.QR_CODE],
+        showZoomSliderIfSupported: true,
+        defaultZoomValueIfSupported: 2,
+        disableFlip: true,
+        showGalleryButton: false,
+        disableSelectFileScan: true,
+        hideScanTypeSelector: true,
+        hideSelectFileOption: true,
+        scanMode: "camera"
       }, false);
 
       scannerRef.current = scanner;
       html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
-      scanner.render(
-        (decodedText: string) => {
-          if (decodedText === lastScanned) return;
+      if (permissionStatus.state === 'granted') {
+        scanner.render(
+          (decodedText: string) => {
+            if (decodedText === lastScanned) return;
 
-          if ('vibrate' in navigator) {
-            navigator.vibrate(100);
+            if ('vibrate' in navigator) {
+              navigator.vibrate(100);
+            }
+
+            const audio = new Audio('/sounds/beep.mp3');
+            audio.play().catch(() => {});
+
+            setLastScanned(decodedText);
+            onScan(decodedText);
+
+            setTimeout(() => {
+              setLastScanned(null);
+            }, 2000);
+          },
+          (error: unknown) => {
+            console.debug('QR Scanner error:', error);
           }
+        );
+      } else {
+        scanner.render(
+          (decodedText: string) => {
+            if (decodedText === lastScanned) return;
 
-          const audio = new Audio('/sounds/beep.mp3');
-          audio.play().catch(() => {});
+            if ('vibrate' in navigator) {
+              navigator.vibrate(100);
+            }
 
-          setLastScanned(decodedText);
-          onScan(decodedText);
+            const audio = new Audio('/sounds/beep.mp3');
+            audio.play().catch(() => {});
 
-          setTimeout(() => {
-            setLastScanned(null);
-          }, 2000);
-        },
-        (error: unknown) => {
-          console.debug('QR Scanner error:', error);
-        }
-      );
+            setLastScanned(decodedText);
+            onScan(decodedText);
+
+            setTimeout(() => {
+              setLastScanned(null);
+            }, 2000);
+          },
+          (error: unknown) => {
+            console.debug('QR Scanner error:', error);
+          }
+        );
+      }
 
       const initTimeout = setTimeout(() => {
         setIsInitialized(true);
