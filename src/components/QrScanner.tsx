@@ -55,8 +55,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
         formatsToSupport: permissionStatus.state === 'granted' ? undefined : [Html5QrcodeSupportedFormats.QR_CODE],
         showZoomSliderIfSupported: true,
         defaultZoomValueIfSupported: 2,
-        disableFlip: true,
-        scanMode: "camera"
+        disableFlip: true
       }, false);
 
       scannerRef.current = scanner;
