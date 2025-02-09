@@ -23,11 +23,11 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
-  const [currentCamera, setCurrentCamera] = useState<string>('environment'); // Default to back camera
+  const [currentCamera, setCurrentCamera] = useState<string>('user');
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [manualRegNo, setManualRegNo] = useState('');
-  const [isManualEntryLocked, setIsManualEntryLocked] = useState(true);
+  const [isManualEntryLocked, setIsManualEntryLocked] = useState(false);
   const [showPinDialog, setShowPinDialog] = useState(false);
   const [pinDialogMode, setPinDialogMode] = useState<'set' | 'verify'>('verify');
   const [sessionPin, setSessionPin] = useState<string | null>(null);
@@ -49,7 +49,6 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
           facingMode: preferredCamera || currentCamera,
           width: { min: 640, ideal: 1280, max: 1920 },
           height: { min: 480, ideal: 720, max: 1080 },
-          // Increase zoom for mobile devices
           advanced: [{ zoom: 2.0 }]
         }
       }, false);
@@ -93,17 +92,14 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
   const switchCamera = async () => {
     if (!html5QrCodeRef.current) return;
 
-    // Toggle between front and back camera
     const newFacingMode = currentCamera === 'environment' ? 'user' : 'environment';
     setCurrentCamera(newFacingMode);
     localStorage.setItem(CAMERA_STORAGE_KEY, newFacingMode);
 
-    // Stop current scanner
     if (scannerRef.current?.getState() === Html5QrcodeScannerState.SCANNING) {
       await scannerRef.current.clear();
     }
 
-    // Reinitialize with new camera
     await initializeScanner();
   };
 
@@ -111,7 +107,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
     e.preventDefault();
     if (manualRegNo.trim()) {
       onScan(manualRegNo.trim().toUpperCase());
-      setManualRegNo(''); // Clear input after submission
+      setManualRegNo('');
     }
   };
 
@@ -147,31 +143,28 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
     };
   }, [duration, onSessionEnd]);
 
-  useEffect(() => {
-    // Only show PIN setup dialog if no session PIN exists
-    if (!sessionPin) {
-      setPinDialogMode('set');
-      setShowPinDialog(true);
-    }
-  }, [sessionPin]);
-
   const handleSetPin = (pin: string) => {
-    setSessionPin(pin); // Store PIN in memory for the session
+    setSessionPin(pin);
     setIsManualEntryLocked(true);
+    setShowPinDialog(false);
   };
 
   const handleUnlock = () => {
     setIsManualEntryLocked(false);
+    setShowPinDialog(false);
   };
 
   const handleLockClick = () => {
     if (isManualEntryLocked) {
-      // If locked, show verify dialog
       setPinDialogMode('verify');
       setShowPinDialog(true);
     } else {
-      // If unlocked, just lock it (no need for PIN entry)
-      setIsManualEntryLocked(true);
+      if (!sessionPin) {
+        setPinDialogMode('set');
+        setShowPinDialog(true);
+      } else {
+        setIsManualEntryLocked(true);
+      }
     }
   };
 
