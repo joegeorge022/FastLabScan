@@ -56,10 +56,6 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
         showZoomSliderIfSupported: true,
         defaultZoomValueIfSupported: 2,
         disableFlip: true,
-        showGalleryButton: false,
-        disableSelectFileScan: true,
-        hideScanTypeSelector: true,
-        hideSelectFileOption: true,
         scanMode: "camera"
       }, false);
 

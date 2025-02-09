@@ -9,9 +9,7 @@ import { Label } from "@/components/ui/label";
 const STORAGE_KEY = 'last_department_config';
 
 const DEPARTMENTS = [
-  { value: 'CSE-A', label: 'CSE-A' },
-  { value: 'CSE-B', label: 'CSE-B' },
-  { value: 'CSE-C', label: 'CSE-C' },
+  { value: 'CS', label: 'CS' },
   { value: 'AD', label: 'AD' },
   { value: 'AI', label: 'AI' },
   { value: 'EEE', label: 'EEE' },
