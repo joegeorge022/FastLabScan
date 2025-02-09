@@ -1,10 +1,10 @@
 'use client';
 
-import { useSessions, downloadSession, downloadExcel, downloadJSON, downloadCSV } from '@/hooks/useSessions';
+import { useSessions, downloadExcel, downloadJSON, downloadCSV } from '@/hooks/useSessions';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { formatDistanceToNow } from 'date-fns';
-import { Download, MoreVertical, FileSpreadsheet, FileJson, FileText, Trash2 } from "lucide-react";
+import { MoreVertical, FileSpreadsheet, FileJson, FileText, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
