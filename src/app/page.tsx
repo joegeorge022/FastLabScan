@@ -58,7 +58,6 @@ export default function Home() {
   const handleScan = (regNo: string) => {
     if (!session) return;
 
-    // Check if student already scanned
     if (session.students.some(s => s.regNo === regNo)) {
       return;
     }
@@ -257,7 +256,14 @@ export default function Home() {
                       >
                         <button
                           onClick={() => {
-                            downloadExcel(session);
+                            const sessionData = {
+                              id: Date.now().toString(),
+                              date: Date.now(),
+                              department: session.department,
+                              year: session.year,
+                              students: session.students
+                            };
+                            downloadExcel(sessionData);
                             setShowExportMenu(false);
                           }}
                           className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
@@ -267,7 +273,14 @@ export default function Home() {
                         </button>
                         <button
                           onClick={() => {
-                            downloadJSON(session);
+                            const sessionData = {
+                              id: Date.now().toString(),
+                              date: Date.now(),
+                              department: session.department,
+                              year: session.year,
+                              students: session.students
+                            };
+                            downloadJSON(sessionData);
                             setShowExportMenu(false);
                           }}
                           className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"
@@ -277,7 +290,14 @@ export default function Home() {
                         </button>
                         <button
                           onClick={() => {
-                            downloadCSV(session);
+                            const sessionData = {
+                              id: Date.now().toString(),
+                              date: Date.now(),
+                              department: session.department,
+                              year: session.year,
+                              students: session.students
+                            };
+                            downloadCSV(sessionData);
                             setShowExportMenu(false);
                           }}
                           className="relative flex w-full cursor-pointer select-none items-center rounded-sm px-4 py-2 text-sm outline-none transition-colors hover:bg-accent hover:text-accent-foreground active:scale-[0.98]"

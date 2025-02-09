@@ -18,11 +18,28 @@ export const metadata: Metadata = {
   description: "Quick attendance scanning for labs",
   manifest: "/manifest.json",
   themeColor: "#2563eb",
-  viewport: "width=device-width, initial-scale=1, maximum-scale=1",
+  viewport: {
+    width: 'device-width',
+    initialScale: 1,
+    maximumScale: 1,
+    userScalable: false,
+  },
   appleWebApp: {
     capable: true,
     statusBarStyle: "default",
     title: "Lab Scanner",
+  },
+  formatDetection: {
+    telephone: false,
+  },
+  icons: {
+    icon: [
+      { url: '/icon-192x192.png', sizes: '192x192', type: 'image/png' },
+      { url: '/icon-512x512.png', sizes: '512x512', type: 'image/png' },
+    ],
+    apple: [
+      { url: '/icon-192x192.png' },
+    ],
   },
 };
 

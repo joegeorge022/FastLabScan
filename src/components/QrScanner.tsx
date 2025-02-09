@@ -1,7 +1,7 @@
 'use client';
 
 import { Html5QrcodeScanner, Html5QrcodeScannerState, Html5Qrcode } from "html5-qrcode";
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import type { ReactElement } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
@@ -32,7 +32,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
   const [pinDialogMode, setPinDialogMode] = useState<'set' | 'verify'>('verify');
   const [sessionPin, setSessionPin] = useState<string | null>(null);
 
-  const initializeScanner = async () => {
+  const initializeScanner = useCallback(async () => {
     try {
       const preferredCamera = localStorage.getItem(CAMERA_STORAGE_KEY);
       
@@ -49,7 +49,6 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
           facingMode: preferredCamera || currentCamera,
           width: { min: 640, ideal: 1280, max: 1920 },
           height: { min: 480, ideal: 720, max: 1080 },
-          advanced: [{ zoom: 2.0 }]
         }
       }, false);
 
@@ -87,7 +86,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
     } catch (error) {
       console.error('Failed to initialize scanner:', error);
     }
-  };
+  }, [currentCamera, lastScanned, onScan]);
 
   const switchCamera = async () => {
     if (!html5QrCodeRef.current) return;
@@ -128,7 +127,7 @@ export function QrScanner({ onScan, duration, onSessionEnd }: Props): ReactEleme
       scannerRef.current = null;
       html5QrCodeRef.current = null;
     };
-  }, [onScan, lastScanned]);
+  }, [onScan, lastScanned, initializeScanner]);
 
   useEffect(() => {
     const timer = setInterval(() => {
