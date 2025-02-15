@@ -112,8 +112,6 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
 
   const initializeScanner = useCallback(async () => {
     try {
-      const permissionStatus = await navigator.permissions.query({ name: 'camera' as PermissionName });
-      
       const preferredCamera = localStorage.getItem(CAMERA_STORAGE_KEY);
       
       const scanner = new Html5QrcodeScanner("qr-reader", {
