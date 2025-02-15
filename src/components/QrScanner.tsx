@@ -48,7 +48,7 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
-  const [currentCamera, setCurrentCamera] = useState<string>('user');
+  const [currentCamera, setCurrentCamera] = useState<string>('environment'); // i tried front camera but it was not stable so i used environment
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [manualRegNo, setManualRegNo] = useState('');
@@ -106,7 +106,7 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
       setTimeout(() => {
         setIsProcessingScan(false);
         setLastScanned(null);
-      }, 2000);
+      }, 1000);
     }
   }, [currentDepartment, isProcessingScan, lastScanned, onScan, showToast]);
 
@@ -116,8 +116,10 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
       
       const preferredCamera = localStorage.getItem(CAMERA_STORAGE_KEY);
       
+      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
+      
       const scanner = new Html5QrcodeScanner("qr-reader", {
-        fps: 10,
+        fps: isMobile ? 15 : 10,
         qrbox: {
           width: 250,
           height: 250
@@ -127,32 +129,32 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
         showTorchButtonIfSupported: true,
         videoConstraints: {
           facingMode: preferredCamera || currentCamera,
-          width: { min: 640, ideal: 1280, max: 1920 },
-          height: { min: 480, ideal: 720, max: 1080 },
+          width: isMobile ? 
+            { min: 360, ideal: 720, max: 1280 } : 
+            { min: 640, ideal: 1280, max: 1920 },
+          height: isMobile ? 
+            { min: 360, ideal: 720, max: 1280 } : 
+            { min: 480, ideal: 720, max: 1080 },
         },
-        formatsToSupport: permissionStatus.state === 'granted' ? undefined : [Html5QrcodeSupportedFormats.QR_CODE],
+        formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         showZoomSliderIfSupported: true,
-        defaultZoomValueIfSupported: 2,
-        disableFlip: true
+        defaultZoomValueIfSupported: isMobile ? 1 : 1.5,
+        disableFlip: isMobile
       }, false);
 
       scannerRef.current = scanner;
       html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
-      if (permissionStatus.state === 'granted') {
-        scanner.render(
+      try {
+        await scanner.render(
           handleScan,
           (error: unknown) => {
             console.debug('QR Scanner error:', error);
           }
         );
-      } else {
-        scanner.render(
-          handleScan,
-          (error: unknown) => {
-            console.debug('QR Scanner error:', error);
-          }
-        );
+      } catch (error) {
+        console.error('Scanner render error:', error);
+        setTimeout(initializeScanner, 1000);
       }
 
       const initTimeout = setTimeout(() => {
@@ -163,7 +165,7 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
     } catch (error) {
       console.error('Failed to initialize scanner:', error);
     }
-  }, [currentCamera, lastScanned, onScan, currentDepartment]);
+  }, [currentCamera, handleScan]);
 
   const switchCamera = async () => {
     if (!html5QrCodeRef.current) return;
