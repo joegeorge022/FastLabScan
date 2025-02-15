@@ -48,7 +48,7 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
   const [timeLeft, setTimeLeft] = useState(duration * 60);
   const [isInitialized, setIsInitialized] = useState(false);
   const [lastScanned, setLastScanned] = useState<string | null>(null);
-  const [currentCamera, setCurrentCamera] = useState<string>('environment'); // i tried front camera but it was not stable so i used environment
+  const [currentCamera, setCurrentCamera] = useState<string>('environment');
   const scannerRef = useRef<Html5QrcodeScanner | null>(null);
   const html5QrCodeRef = useRef<Html5Qrcode | null>(null);
   const [manualRegNo, setManualRegNo] = useState('');
@@ -116,10 +116,8 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
       
       const preferredCamera = localStorage.getItem(CAMERA_STORAGE_KEY);
       
-      const isMobile = /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
-      
       const scanner = new Html5QrcodeScanner("qr-reader", {
-        fps: isMobile ? 15 : 10,
+        fps: 10,
         qrbox: {
           width: 250,
           height: 250
@@ -129,33 +127,24 @@ export function QrScanner({ onScan, duration, onSessionEnd, currentDepartment }:
         showTorchButtonIfSupported: true,
         videoConstraints: {
           facingMode: preferredCamera || currentCamera,
-          width: isMobile ? 
-            { min: 360, ideal: 720, max: 1280 } : 
-            { min: 640, ideal: 1280, max: 1920 },
-          height: isMobile ? 
-            { min: 360, ideal: 720, max: 1280 } : 
-            { min: 480, ideal: 720, max: 1080 },
+          width: { min: 640, ideal: 1280, max: 1920 },
+          height: { min: 480, ideal: 720, max: 1080 },
         },
         formatsToSupport: [Html5QrcodeSupportedFormats.QR_CODE],
         showZoomSliderIfSupported: true,
-        defaultZoomValueIfSupported: isMobile ? 1 : 1.5,
-        disableFlip: isMobile
+        defaultZoomValueIfSupported: 1.5,
+        disableFlip: false
       }, false);
 
       scannerRef.current = scanner;
       html5QrCodeRef.current = new Html5Qrcode("qr-reader");
 
-      try {
-        await scanner.render(
-          handleScan,
-          (error: unknown) => {
-            console.debug('QR Scanner error:', error);
-          }
-        );
-      } catch (error) {
-        console.error('Scanner render error:', error);
-        setTimeout(initializeScanner, 1000);
-      }
+      scanner.render(
+        handleScan,
+        (error: unknown) => {
+          console.debug('QR Scanner error:', error);
+        }
+      );
 
       const initTimeout = setTimeout(() => {
         setIsInitialized(true);

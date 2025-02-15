@@ -142,6 +142,7 @@ body {
   cursor: pointer;
 }
 
+/* Hide file selection elements */
 #qr-reader input[type="file"],
 #qr-reader__filescan_input {
   display: none !important;
@@ -193,43 +194,51 @@ body {
   }
 }
 
+/* Improve input appearance on mobile */
 input[type="text"] {
   -webkit-appearance: none;
   appearance: none;
   border-radius: 0.5rem;
 }
 
+/* Add touch feedback for mobile */
 @media (hover: none) {
   .touch-feedback:active {
     transform: scale(0.98);
   }
 }
 
+/* Add these styles for the PIN input */
 input[type="password"][inputmode="numeric"] {
   letter-spacing: 0.5em;
   font-family: monospace;
 }
 
+/* Hide password reveal button in modern browsers */
 input[type="password"]::-ms-reveal,
 input[type="password"]::-ms-clear {
   display: none;
 }
 
+/* Improve touch targets on mobile */
 @media (max-width: 640px) {
   .pin-button {
     min-height: 44px;
   }
 }
 
+/* Add these styles to hide the file scan option */
 #qr-reader__filescan_input,
 #qr-reader a {
   display: none !important;
 }
 
+/* Hide any elements with text containing "Scan an Image File" */
 #qr-reader *:contains('Scan an Image File') {
   display: none !important;
 }
 
+/* Hide specifically the "Scan an Image File" link */
 #html5-qrcode-anchor-scan-type-change {
   display: none !important;
 }
@@ -242,22 +251,13 @@ select#html5-qrcode-select-camera {
   display: none !important;
 }
 
+/* Add styles to reduce motion on mobile */
 @media (max-width: 768px) {
-  #qr-reader__scan_region {
-    min-height: 300px !important;
-    max-height: 70vh !important;
-  }
-
   #qr-reader__scan_region video {
-    transform: none !important;
-    object-fit: cover !important;
-    width: 100% !important;
-    height: 100% !important;
-    margin: 0 !important;
+    transform: none;
   }
-
+  
   #qr-reader {
-    will-change: transform;
     transform: translateZ(0);
     backface-visibility: hidden;
     perspective: 1000;
@@ -265,18 +265,4 @@ select#html5-qrcode-select-camera {
     -webkit-backface-visibility: hidden;
     -webkit-perspective: 1000;
   }
-
-  #qr-reader__scan_region::after {
-    border: 3px solid #2563eb;
-    box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.5);
-  }
-}
-
-#qr-reader__filescan_input,
-#qr-reader a,
-#html5-qrcode-anchor-scan-type-change,
-select#html5-qrcode-select-camera,
-#html5-qrcode-select-camera-container,
-#qr-reader__status_span {
-  display: none !important;
 }
