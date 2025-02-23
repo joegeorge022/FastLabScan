@@ -1,0 +1,268 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 240 5.9% 10%;
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+  }
+
+  .dark {
+    --background: 240 10% 3.9%;
+    --foreground: 0 0% 98%;
+    --card: 240 10% 3.9%;
+    --card-foreground: 0 0% 98%;
+    --popover: 240 10% 3.9%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 0 0% 98%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 3.7% 15.9%;
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 3.7% 15.9%;
+    --muted-foreground: 240 5% 64.9%;
+    --accent: 240 3.7% 15.9%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 0 62.8% 30.6%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 3.7% 15.9%;
+    --input: 240 3.7% 15.9%;
+    --ring: 240 4.9% 83.9%;
+  }
+}
+
+body {
+  color: var(--foreground);
+  background: var(--background);
+  font-family: Arial, Helvetica, sans-serif;
+}
+
+#qr-reader {
+  width: 100% !important;
+  border: none !important;
+  background: white;
+  border-radius: 0.5rem;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+#qr-reader__scan_region {
+  flex: 1;
+  min-height: 350px !important;
+  background: black;
+  position: relative;
+  overflow: hidden;
+}
+
+#qr-reader__scan_region video {
+  object-fit: cover !important;
+  min-height: 350px !important;
+  margin-bottom: 0 !important;
+  width: 100% !important;
+  height: 100% !important;
+  transform: scaleX(-1);
+}
+
+#qr-reader__scan_region::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  width: 250px;
+  height: 250px;
+  border: 2px solid #2563eb;
+  border-radius: 1rem;
+  pointer-events: none;
+  box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.3);
+}
+
+#qr-reader__dashboard {
+  padding: 1rem !important;
+  background: white;
+  border-top: 1px solid #e5e7eb;
+  position: relative;
+  z-index: 10;
+}
+
+#qr-reader__status_span {
+  display: none !important;
+}
+
+#qr-reader video {
+  max-width: 100%;
+  border-radius: 0.5rem;
+}
+
+#qr-reader button {
+  padding: 0.5rem 1rem;
+  background: #2563eb;
+  color: white;
+  border-radius: 0.375rem;
+  border: none;
+  cursor: pointer;
+  font-size: 0.875rem;
+  font-weight: 500;
+  transition: background-color 0.2s;
+  position: relative;
+  z-index: 20;
+}
+
+#qr-reader button:hover {
+  background: #1d4ed8;
+}
+
+#qr-reader select {
+  padding: 0.5rem;
+  border-radius: 0.375rem;
+  border: 1px solid #d1d5db;
+  margin-right: 0.5rem;
+  font-size: 0.875rem;
+  background: white;
+  cursor: pointer;
+}
+
+/* Hide file selection elements */
+#qr-reader input[type="file"],
+#qr-reader__filescan_input {
+  display: none !important;
+}
+
+@keyframes fadeOut {
+  0% { opacity: 1; }
+  50% { opacity: 1; }
+  100% { opacity: 0; }
+}
+
+.animate-fade-out {
+  animation: fadeOut 2s ease-out forwards;
+}
+
+/* Add new utility class for safe area margin */
+.mb-safe {
+  margin-bottom: calc(env(safe-area-inset-bottom) + 5rem) !important;
+}
+
+/* Update the container styles */
+.space-y-4 {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+  padding-bottom: 5rem;
+}
+
+/* Ensure the end session button doesn't overlap */
+.fixed.bottom-0 {
+  padding-bottom: env(safe-area-inset-bottom);
+  z-index: 50;
+}
+
+/* Add styles to handle the QR reader container */
+#qr-reader__dashboard_section,
+#qr-reader__dashboard_section_csr {
+  margin: 0 !important;
+  padding: 0 !important;
+}
+
+/* Add these styles for the manual input section */
+@media (max-width: 640px) {
+  .manual-input-section {
+    position: sticky;
+    top: 0;
+    background: var(--background);
+    z-index: 20;
+  }
+}
+
+/* Improve input appearance on mobile */
+input[type="text"] {
+  -webkit-appearance: none;
+  appearance: none;
+  border-radius: 0.5rem;
+}
+
+/* Add touch feedback for mobile */
+@media (hover: none) {
+  .touch-feedback:active {
+    transform: scale(0.98);
+  }
+}
+
+/* Add these styles for the PIN input */
+input[type="password"][inputmode="numeric"] {
+  letter-spacing: 0.5em;
+  font-family: monospace;
+}
+
+/* Hide password reveal button in modern browsers */
+input[type="password"]::-ms-reveal,
+input[type="password"]::-ms-clear {
+  display: none;
+}
+
+/* Improve touch targets on mobile */
+@media (max-width: 640px) {
+  .pin-button {
+    min-height: 44px;
+  }
+}
+
+/* Add these styles to hide the file scan option */
+#qr-reader__filescan_input,
+#qr-reader a {
+  display: none !important;
+}
+
+/* Hide any elements with text containing "Scan an Image File" */
+#qr-reader *:contains('Scan an Image File') {
+  display: none !important;
+}
+
+/* Hide specifically the "Scan an Image File" link */
+#html5-qrcode-anchor-scan-type-change {
+  display: none !important;
+}
+
+select#html5-qrcode-select-camera {
+  display: none !important;
+}
+
+#html5-qrcode-select-camera-container {
+  display: none !important;
+}
+
+/* Add styles to reduce motion on mobile */
+@media (max-width: 768px) {
+  #qr-reader__scan_region video {
+    transform: none;
+  }
+  
+  #qr-reader {
+    transform: translateZ(0);
+    backface-visibility: hidden;
+    perspective: 1000;
+    -webkit-transform: translateZ(0);
+    -webkit-backface-visibility: hidden;
+    -webkit-perspective: 1000;
+  }
+}
