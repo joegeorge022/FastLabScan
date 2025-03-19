@@ -1,12 +1,11 @@
 {
-  "name": "Lab Scanner",
-  "short_name": "Scanner",
-  "description": "Quick attendance scanning for labs",
+  "name": "FastLabScan",
+  "short_name": "FastLabScan",
+  "description": "QR-based Lab Attendance System",
   "start_url": "/",
   "display": "standalone",
   "background_color": "#ffffff",
-  "theme_color": "#2563eb",
-  "orientation": "portrait",
+  "theme_color": "#000000",
   "icons": [
     {
       "src": "/icon-192x192.png",
@@ -21,7 +20,18 @@
       "purpose": "any maskable"
     }
   ],
-  "splash_pages": null,
+  "orientation": "portrait",
   "scope": "/",
-  "prefer_related_applications": false
-} 
+  "prefer_related_applications": false,
+  "categories": ["education", "productivity"],
+  "shortcuts": [
+    {
+      "name": "New Session",
+      "url": "/"
+    },
+    {
+      "name": "History",
+      "url": "/history"
+    }
+  ]
+}

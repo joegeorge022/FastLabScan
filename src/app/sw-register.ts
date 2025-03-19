@@ -26,21 +26,24 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
     window.addEventListener('online', () => {
       document.body.classList.remove('offline');
       console.log('App is online');
-      window.location.reload();
+      
     });
     
     window.addEventListener('offline', () => {
       document.body.classList.add('offline');
       console.log('App is offline');
+      
       const offlineToast = document.createElement('div');
       offlineToast.className = 'offline-toast';
-      offlineToast.textContent = 'You are offline. The app will continue to work with limited functionality.';
+      offlineToast.textContent = 'You are offline. The app will continue to work.';
       document.body.appendChild(offlineToast);
       
       setTimeout(() => {
         offlineToast.style.opacity = '0';
         setTimeout(() => {
-          document.body.removeChild(offlineToast);
+          if (document.body.contains(offlineToast)) {
+            document.body.removeChild(offlineToast);
+          }
         }, 500);
       }, 3000);
     });
