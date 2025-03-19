@@ -10,5 +10,17 @@ if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
         console.log('ServiceWorker registration failed: ', err);
       }
     );
+    
+    window.addEventListener('online', () => {
+      document.body.classList.remove('offline');
+    });
+    
+    window.addEventListener('offline', () => {
+      document.body.classList.add('offline');
+    });
+    
+    if (!navigator.onLine) {
+      document.body.classList.add('offline');
+    }
   });
-} 
+}

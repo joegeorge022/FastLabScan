@@ -266,3 +266,18 @@ select#html5-qrcode-select-camera {
     -webkit-perspective: 1000;
   }
 }
+
+body.offline::after {
+  content: "Offline Mode";
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background-color: rgba(0, 0, 0, 0.7);
+  color: white;
+  text-align: center;
+  padding: 4px 0;
+  font-size: 12px;
+  z-index: 9999;
+  pointer-events: none;
+}
