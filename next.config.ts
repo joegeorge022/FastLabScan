@@ -11,6 +11,7 @@ const nextConfig = withPWA({
   register: true,
   skipWaiting: true,
   disable: process.env.NODE_ENV === 'development',
+  // Add offline strategy configuration
   runtimeCaching: [
     {
       urlPattern: /^https:\/\/fonts\.(?:googleapis|gstatic)\.com\/.*/i,
@@ -19,7 +20,7 @@ const nextConfig = withPWA({
         cacheName: 'google-fonts',
         expiration: {
           maxEntries: 4,
-          maxAgeSeconds: 365 * 24 * 60 * 60
+          maxAgeSeconds: 365 * 24 * 60 * 60 // 1 year
         }
       }
     },
@@ -30,7 +31,7 @@ const nextConfig = withPWA({
         cacheName: 'font-assets',
         expiration: {
           maxEntries: 4,
-          maxAgeSeconds: 7 * 24 * 60 * 60 
+          maxAgeSeconds: 7 * 24 * 60 * 60 // 1 week
         }
       }
     },
@@ -41,7 +42,7 @@ const nextConfig = withPWA({
         cacheName: 'image-assets',
         expiration: {
           maxEntries: 64,
-          maxAgeSeconds: 7 * 24 * 60 * 60
+          maxAgeSeconds: 7 * 24 * 60 * 60 // 1 week
         }
       }
     },
@@ -52,7 +53,7 @@ const nextConfig = withPWA({
         cacheName: 'audio-assets',
         expiration: {
           maxEntries: 32,
-          maxAgeSeconds: 7 * 24 * 60 * 60 
+          maxAgeSeconds: 7 * 24 * 60 * 60 // 1 week
         }
       }
     },
@@ -63,7 +64,7 @@ const nextConfig = withPWA({
         cacheName: 'next-data',
         expiration: {
           maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60 
+          maxAgeSeconds: 24 * 60 * 60 // 24 hours
         }
       }
     },
@@ -74,7 +75,7 @@ const nextConfig = withPWA({
         cacheName: 'apis',
         expiration: {
           maxEntries: 16,
-          maxAgeSeconds: 24 * 60 * 60
+          maxAgeSeconds: 24 * 60 * 60 // 24 hours
         },
         networkTimeoutSeconds: 10
       }
@@ -86,7 +87,7 @@ const nextConfig = withPWA({
         cacheName: 'others',
         expiration: {
           maxEntries: 32,
-          maxAgeSeconds: 24 * 60 * 60
+          maxAgeSeconds: 24 * 60 * 60 // 24 hours
         },
         networkTimeoutSeconds: 10
       }

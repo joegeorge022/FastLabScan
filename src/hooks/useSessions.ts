@@ -168,46 +168,16 @@ export function useSessions() {
   const [sessions, setSessions] = useState<AttendanceSession[]>([]);
 
   useEffect(() => {
-    // Load sessions from localStorage
-    const loadSessions = () => {
-      try {
-        const stored = localStorage.getItem(STORAGE_KEY);
-        if (stored) {
-          setSessions(JSON.parse(stored));
-        }
-      } catch (error) {
-        console.error('Error loading sessions:', error);
-        // Provide fallback if localStorage is corrupted
-        setSessions([]);
-      }
-    };
-
-    loadSessions();
-
-    // Add event listener to sync data across tabs
-    window.addEventListener('storage', (event) => {
-      if (event.key === STORAGE_KEY) {
-        loadSessions();
-      }
-    });
-
-    return () => {
-      window.removeEventListener('storage', loadSessions);
-    };
+    const stored = localStorage.getItem(STORAGE_KEY);
+    if (stored) {
+      setSessions(JSON.parse(stored));
+    }
   }, []);
 
   const saveSession = (session: AttendanceSession) => {
     setSessions(prev => {
       const updated = [...prev, session];
-      try {
-        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
-      } catch (error) {
-        console.error('Error saving session:', error);
-        // Handle storage quota exceeded or other errors
-        if (error instanceof DOMException && error.name === 'QuotaExceededError') {
-          alert('Storage quota exceeded. Please delete some old sessions.');
-        }
-      }
+      localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
       return updated;
     });
   };
@@ -227,4 +197,4 @@ export function useSessions() {
     downloadSession,
     deleteSession
   };
-}
+} 
