@@ -39,7 +39,15 @@ self.addEventListener('activate', (event) => {
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET') return;
   
-  if (!event.request.url.startsWith(self.location.origin)) return;
+  if (event.request.mode === 'navigate') {
+    event.respondWith(
+      fetch(event.request)
+        .catch(() => {
+          return caches.match('/') || caches.match('/index.html');
+        })
+    );
+    return;
+  }
   
   event.respondWith(
     caches.match(event.request)
@@ -47,30 +55,45 @@ self.addEventListener('fetch', (event) => {
         if (response) {
           return response;
         }
-
-        const fetchRequest = event.request.clone();
-
-        return fetch(fetchRequest)
-          .then((response) => {
-            if (!response || response.status !== 200 || response.type !== 'basic') {
-              return response;
-            }
-
-            const responseToCache = response.clone();
-
-            caches.open(CACHE_NAME)
-              .then((cache) => {
+        
+        return fetch(event.request)
+          .then(response => {
+            if (response && response.status === 200) {
+              const responseToCache = response.clone();
+              caches.open('fastlabscan-runtime-cache').then(cache => {
                 cache.put(event.request, responseToCache);
               });
-
+            }
             return response;
           })
-          .catch(() => {
-            if (event.request.mode === 'navigate') {
-              return caches.match('/');
-            }
+          .catch(error => {
+            console.error('Fetch failed:', error);
+            return new Response('Offline content not available', {
+              status: 503,
+              statusText: 'Service Unavailable',
+              headers: new Headers({
+                'Content-Type': 'text/plain'
+              })
+            });
           });
       })
+  );
+});
+
+self.addEventListener('activate', event => {
+  event.waitUntil(
+    caches.keys().then(cacheNames => {
+      return Promise.all(
+        cacheNames.filter(cacheName => {
+          return cacheName !== 'fastlabscan-runtime-cache' && 
+                 !cacheName.startsWith('workbox-');
+        }).map(cacheName => {
+          return caches.delete(cacheName);
+        })
+      );
+    }).then(() => {
+      return self.clients.claim();
+    })
   );
 });
 
