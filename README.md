@@ -61,7 +61,7 @@ npm start
 - [Next.js](https://nextjs.org/) - React Framework
 - [TypeScript](https://www.typescriptlang.org/) - Type Safety
 - [Tailwind CSS](https://tailwindcss.com/) - Styling
-- [html5-qrcode](https://github.com/mebjas/html5-qrcode) - QR Scanner
+- [react-qr-scanner](https://github.com/yudielcurbelo/react-qr-scanner) - QR Scanner
 - [Vercel](https://vercel.com) - Deployment
 
 ## 📱 PWA Features
@@ -89,7 +89,7 @@ This project is licensed under the GNU General Public License v3.0 - see the LIC
 
 ## 🙏 Acknowledgments
 
-- [html5-qrcode](https://github.com/mebjas/html5-qrcode) for the QR scanning functionality
+- [react-qr-scanner](https://github.com/yudielcurbelo/react-qr-scanner) for the QR scanning functionality
 - [Vercel](https://vercel.com) for hosting
 - All contributors and users of FastLabScan
 
