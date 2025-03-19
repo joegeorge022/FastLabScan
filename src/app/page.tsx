@@ -166,16 +166,26 @@ export default function Home() {
 
   const handleScan = (regNo: string) => {
     if (!session) return;
-
+  
     if (session.students.some(s => s.regNo === regNo)) {
       showToast(`${regNo} already scanned`, 'error');
       return;
     }
-
+  
     const newStudent: Student = {
       regNo,
       timestamp: Date.now()
     };
+  
+    const newSeatNumber = getSeatNumberFromRegNo(regNo);
+    const existingSeatStudent = session.students.find(s => 
+      getSeatNumberFromRegNo(s.regNo) === newSeatNumber
+    );
+    
+    if (existingSeatStudent) {
+      showToast(`Seat ${newSeatNumber} already occupied by ${existingSeatStudent.regNo}`, 'error');
+      return;
+    }
 
     setSession(prev => {
       if (!prev) return null;
