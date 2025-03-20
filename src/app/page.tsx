@@ -27,6 +27,14 @@ const formatRegNo = (regNo: string) => {
   return { prefix, number };
 };
 
+const getSeatNumberFromRegNo = (regNo: string): number => {
+const match = regNo.match(/(\d+)$/);
+if (match) {
+return parseInt(match[0], 10);
+}
+return 0;
+};
+
 export default function Home() {
   const router = useRouter();
   const { saveSession } = useSessions();
@@ -62,6 +70,43 @@ export default function Home() {
       }
     }
   }, [showToast]);
+
+  useEffect(() => {
+    const savedSession = localStorage.getItem('activeSession');
+    if (savedSession) {
+      try {
+        const parsedSession = JSON.parse(savedSession) as ActiveSession & { lastUpdated?: number };
+        
+        const thirtyMinutesInMs = 30 * 60 * 1000;
+        const now = Date.now();
+        const lastUpdated = parsedSession.lastUpdated || 0;
+        
+        if (now - lastUpdated > thirtyMinutesInMs) {
+          localStorage.removeItem('activeSession');
+          showToast('Previous session expired', 'error');
+          return;
+        }
+        
+        setSession(parsedSession);
+        showToast('Session restored from previous session', 'success');
+      } catch (error) {
+        console.error('Error restoring session:', error);
+        localStorage.removeItem('activeSession');
+      }
+    }
+  }, [showToast]);
+
+  useEffect(() => {
+    if (session && session.students.length > 0) {
+      const dims = getGridDimensions(session.students.length);
+      const maxSeatNumber = Math.max(
+        ...session.students.map(s => getSeatNumberFromRegNo(s.regNo))
+      );
+      if (maxSeatNumber > dims.rows * dims.cols) {
+        setSession(prev => prev ? {...prev} : null);
+      }
+    }
+  }, [session?.students.length]);
 
   useEffect(() => {
     if (session) {
@@ -121,16 +166,26 @@ export default function Home() {
 
   const handleScan = (regNo: string) => {
     if (!session) return;
-
+  
     if (session.students.some(s => s.regNo === regNo)) {
       showToast(`${regNo} already scanned`, 'error');
       return;
     }
-
+  
     const newStudent: Student = {
       regNo,
       timestamp: Date.now()
     };
+  
+    const newSeatNumber = getSeatNumberFromRegNo(regNo);
+    const existingSeatStudent = session.students.find(s => 
+      getSeatNumberFromRegNo(s.regNo) === newSeatNumber
+    );
+    
+    if (existingSeatStudent) {
+      showToast(`Seat ${newSeatNumber} already occupied by ${existingSeatStudent.regNo}`, 'error');
+      return;
+    }
 
     setSession(prev => {
       if (!prev) return null;
@@ -210,19 +265,70 @@ export default function Home() {
     const gapClass = isLargeDesktop ? 'gap-4' : isDesktop ? 'gap-3' : isMobile ? 'gap-1.5' : 'gap-2';
     const paddingClass = isDesktop ? (dimensions.cols >= 8 ? 'p-2' : 'p-3') : 'p-1.5';
     
+    const seatMap: Record<number, Student> = {};
+    session.students.forEach(student => {
+      const seatNumber = getSeatNumberFromRegNo(student.regNo);
+      seatMap[seatNumber] = student;
+    });
+    
+    const maxGridSeat = dimensions.rows * dimensions.cols;
+    
+    const occupiedSeats = session.students.map(s => getSeatNumberFromRegNo(s.regNo)).sort((a, b) => a - b);
+    
+    const seatNumbers: number[] = [];
+    
+    for (let i = 1; i <= maxGridSeat; i++) {
+      seatNumbers.push(i);
+    }
+    
+    if (occupiedSeats.some(seat => seat > maxGridSeat)) {
+      const overflowSeats = occupiedSeats.filter(seat => seat > maxGridSeat);
+      
+      seatNumbers.push(-1);
+      
+      seatNumbers.push(...overflowSeats);
+    }
+    
+    for (let i = 1; i < seatNumbers.length; i++) {
+      const current = seatNumbers[i];
+      const prev = seatNumbers[i-1];
+      
+      if (current === -1 || prev === -1 || current === prev + 1) continue;
+      
+      if (current > prev + 1) {
+        seatNumbers.splice(i, 0, -1);
+        i++;
+      }
+    }
+    
     return (
       <div 
         className={`grid ${gapClass} ${paddingClass}`}
         style={{ 
           gridTemplateColumns: `repeat(${dimensions.cols}, minmax(0, 1fr))`,
-          gridTemplateRows: `repeat(${dimensions.rows}, minmax(0, 1fr))`
+          gridTemplateRows: `repeat(${Math.ceil(seatNumbers.length / dimensions.cols)}, minmax(0, 1fr))`
         }}
       >
-        {Array.from({ length: dimensions.rows * dimensions.cols }).map((_, index) => {
-          const student = session?.students[index];
+        {seatNumbers.map((seatNumber, index) => {
+          if (seatNumber === -1) {
+            return (
+              <div
+                key={`placeholder-${index}`}
+                className={cn(
+                  "aspect-square rounded-lg text-center flex flex-col items-center justify-center relative",
+                  "bg-gray-100 text-gray-500 border-2 border-gray-200"
+                )}
+              >
+                <div className="text-2xl font-bold">...</div>
+              </div>
+            );
+          }
+          
+          const student = seatMap[seatNumber];
+          
           return (
             <div
-              key={index}
+              key={`seat-${seatNumber}`}
               className={cn(
                 "aspect-square rounded-lg text-center flex flex-col items-center justify-center relative",
                 "transition-colors duration-200 active:scale-95 touch-manipulation shadow-sm",
@@ -239,7 +345,7 @@ export default function Home() {
                 isLargeDesktop ? (dimensions.cols >= 8 ? "text-base" : "text-lg") : "text-base",
                 student ? "text-green-700" : "text-red-700"
               )}>
-                {index + 1}
+                {seatNumber}
               </div>
               
               {student && (
