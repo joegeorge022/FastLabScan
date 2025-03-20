@@ -339,28 +339,23 @@ export default function Home() {
               )}
               title={student ? student.regNo : ''}
             >
-              <div className={cn(
-                "absolute top-1 left-1.5 font-bold",
-                isSmallMobile ? "text-xs" : isMobile ? "text-sm" :
-                isLargeDesktop ? (dimensions.cols >= 8 ? "text-base" : "text-lg") : "text-base",
-                student ? "text-green-700" : "text-red-700"
-              )}>
-                {seatNumber}
-              </div>
+              {!student && (
+                <div className={cn(
+                  "absolute top-1 left-1.5 font-bold",
+                  isSmallMobile ? "text-xs" : isMobile ? "text-sm" :
+                  isLargeDesktop ? (dimensions.cols >= 8 ? "text-base" : "text-lg") : "text-base",
+                  "text-red-700"
+                )}>
+                  {seatNumber}
+                </div>
+              )}
               
               {student && (
-                <div className="text-center mt-2">
-                  <div className={cn(
-                    "font-medium opacity-90",
-                    isSmallMobile ? "text-xs" : isMobile ? "text-sm" :
-                    isLargeDesktop ? (dimensions.cols >= 8 ? "text-sm" : "text-base") : "text-sm"
-                  )}>
-                    {formatRegNo(student.regNo).prefix}
-                  </div>
+                <div className="text-center">
                   <div className={cn(
                     "font-bold",
-                    isSmallMobile ? "text-sm" : isMobile ? "text-base" :
-                    isLargeDesktop ? (dimensions.cols >= 8 ? "text-lg" : "text-xl") : "text-lg"
+                    isSmallMobile ? "text-lg" : isMobile ? "text-xl" :
+                    isLargeDesktop ? (dimensions.cols >= 8 ? "text-xl" : "text-2xl") : "text-xl"
                   )}>
                     {formatRegNo(student.regNo).number}
                   </div>
